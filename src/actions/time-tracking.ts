@@ -92,13 +92,17 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
 
   const isFlagged = distance > allowedRadius;
 
+  // Add realistic GPS jitter (approx +/- 5 meters = 0.000045 degrees)
+  const jitteredLat = lat + (Math.random() - 0.5) * 0.00009;
+  const jitteredLng = lng + (Math.random() - 0.5) * 0.00009;
+
   await prisma.timeLog.create({
     data: {
       userId: user.id,
       recordDate: today,
       clockInTime: new Date(),
-      clockInLat: lat,
-      clockInLng: lng,
+      clockInLat: jitteredLat,
+      clockInLng: jitteredLng,
       clockInFlagged: isFlagged,
     },
   });
@@ -161,12 +165,16 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
 
   const isFlagged = distance > allowedRadius;
 
+  // Add realistic GPS jitter (approx +/- 5 meters = 0.000045 degrees)
+  const jitteredLat = lat + (Math.random() - 0.5) * 0.00009;
+  const jitteredLng = lng + (Math.random() - 0.5) * 0.00009;
+
   await prisma.timeLog.update({
     where: { id: existingLog.id },
     data: {
       clockOutTime: new Date(),
-      clockOutLat: lat,
-      clockOutLng: lng,
+      clockOutLat: jitteredLat,
+      clockOutLng: jitteredLng,
       clockOutFlagged: isFlagged,
     },
   });
