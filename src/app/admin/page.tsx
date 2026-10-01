@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getAdminLogs, getAdminMonthlyLogs, updateCompanySettings } from "@/actions/admin";
 import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
@@ -33,6 +34,9 @@ export default function AdminDashboardPage() {
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calSelectedDate, setCalSelectedDate] = useState<Date | null>(null);
   const [isCalLoading, setIsCalLoading] = useState(false);
+
+  const [monthlyLogsData, setMonthlyLogsData] = useState<any[]>([]);
+  const [isMonthlyLoading, setIsMonthlyLoading] = useState(false);
 
   // Form State - Users
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +89,15 @@ export default function AdminDashboardPage() {
       if (activeTab === "LOGS") {
         const data = await getAdminLogs(targetDate);
         setLogs(data);
+        setIsMonthlyLoading(true);
+        try {
+          const d = new Date(targetDate);
+          const mLogs = await getAdminMonthlyLogs(d.getFullYear(), d.getMonth() + 1);
+          setMonthlyLogsData(mLogs);
+        } catch (e) {
+          console.error(e);
+        }
+        setIsMonthlyLoading(false);
       } else if (activeTab === "USERS") {
         const data = await getUsers();
         setUsers(data);
@@ -270,6 +283,58 @@ export default function AdminDashboardPage() {
 
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
+  // --- Chart Data Computation ---
+  const PIE_COLORS = { 'ปกติ': '#10B981', 'สาย': '#F59E0B', 'นอกพื้นที่': '#EF4444', 'ขาด/ยังไม่ลงเวลา': '#9CA3AF' };
+
+  let todayNormal = 0;
+  let todayLate = 0;
+  let todayOutOfBounds = 0;
+  let todayMissing = 0;
+
+  if (filteredLogs.length > 0 && users.length > 0) {
+    const activeUsers = users.filter(u => {
+      if (shiftFilter !== "ALL" && u.shiftType !== shiftFilter) return false;
+      if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    });
+    todayMissing = Math.max(0, activeUsers.length - filteredLogs.length);
+    
+    filteredLogs.forEach(log => {
+      if (log.clockInFlagged || log.clockOutFlagged) todayOutOfBounds++;
+      else if (log.lateness?.isLate) todayLate++;
+      else todayNormal++;
+    });
+  }
+
+  const pieData = [
+    { name: 'ปกติ', value: todayNormal },
+    { name: 'สาย', value: todayLate },
+    { name: 'นอกพื้นที่', value: todayOutOfBounds },
+    ...(todayMissing > 0 ? [{ name: 'ขาด/ยังไม่ลงเวลา', value: todayMissing }] : [])
+  ].filter(d => d.value > 0);
+
+  // Bar Chart Data (Monthly)
+  const filteredMonthlyLogs = monthlyLogsData.filter(log => {
+    if (shiftFilter !== "ALL" && log.user.shiftType !== shiftFilter) return false;
+    if (searchQuery && !log.user.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  const barDataMap: Record<number, any> = {};
+  for (let i = 1; i <= daysInMonth; i++) {
+    barDataMap[i] = { date: `${i}`, ปกติ: 0, สาย: 0, นอกพื้นที่: 0 };
+  }
+
+  filteredMonthlyLogs.forEach(log => {
+    const d = new Date(log.recordDate).getDate();
+    if (barDataMap[d]) {
+      if (log.clockInFlagged || log.clockOutFlagged) barDataMap[d].นอกพื้นที่++;
+      else if (log.lateness?.isLate) barDataMap[d].สาย++;
+      else barDataMap[d].ปกติ++;
+    }
+  });
+  const barData = Object.values(barDataMap);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen p-4 md:p-8 flex flex-col items-center animate-pulse">
@@ -333,7 +398,59 @@ export default function AdminDashboardPage() {
 
       {/* Main Content Area */}
       {activeTab === "LOGS" && (
-        <div className="max-w-6xl w-full neu-flat p-8">
+        <div className="max-w-6xl w-full flex flex-col gap-8">
+          
+          {/* Charts Container */}
+          <div className="neu-flat p-8 flex flex-col xl:flex-row gap-8">
+             {/* Doughnut Chart */}
+             <div className="w-full xl:w-1/3 flex flex-col">
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">ภาพรวมวันนี้ ({formatDate(targetDate)})</h2>
+               <div className="h-64 relative flex justify-center items-center">
+                 {loading ? (
+                    <div className="w-48 h-48 rounded-full border-8 border-gray-200/60 animate-pulse"></div>
+                 ) : pieData.length === 0 ? (
+                    <p className="text-gray-400">ไม่มีข้อมูล</p>
+                 ) : (
+                   <ResponsiveContainer width="100%" height="100%">
+                     <PieChart>
+                       <Pie data={pieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                         {pieData.map((entry, index) => (
+                           <Cell key={`cell-${index}`} fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS]} />
+                         ))}
+                       </Pie>
+                       <RechartsTooltip />
+                       <Legend verticalAlign="bottom" height={36}/>
+                     </PieChart>
+                   </ResponsiveContainer>
+                 )}
+               </div>
+             </div>
+
+             {/* Bar Chart */}
+             <div className="w-full xl:w-2/3 flex flex-col">
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">สถิติทั้งเดือน ({thaiMonths[new Date(targetDate).getMonth()]})</h2>
+               <div className="h-64">
+                 {isMonthlyLoading ? (
+                    <div className="w-full h-full bg-gray-200/60 rounded-xl animate-pulse"></div>
+                 ) : (
+                   <ResponsiveContainer width="100%" height="100%">
+                     <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                       <XAxis dataKey="date" tick={{fontSize: 12}} axisLine={false} tickLine={false} />
+                       <YAxis tick={{fontSize: 12}} axisLine={false} tickLine={false} />
+                       <RechartsTooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} />
+                       <Legend verticalAlign="top" height={36}/>
+                       <Bar dataKey="ปกติ" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
+                       <Bar dataKey="สาย" stackId="a" fill="#F59E0B" />
+                       <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                     </BarChart>
+                   </ResponsiveContainer>
+                 )}
+               </div>
+             </div>
+          </div>
+
+          <div className="neu-flat p-8">
           <div className="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <h2 className="text-lg font-bold text-gray-700">บันทึกการลงเวลา</h2>
