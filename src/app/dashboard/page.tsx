@@ -335,7 +335,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 {(() => {
-                  const { isLate, text } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || session?.user?.shiftType || "OFFICE");
+                  const { isLate, text } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || (session?.user as any)?.shiftType || "OFFICE");
                   return (
                     <p className={`text-xs font-bold ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
                       {text}
