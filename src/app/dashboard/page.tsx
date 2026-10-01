@@ -118,7 +118,7 @@ export default function DashboardPage() {
   const handleGetLocation = () => {
     if (!settings) return;
     setLocationState("LOCATING");
-    setMessage("กำลังค้นหาพิกัด GPS...");
+    setMessage(t("dash_loc_calculating"));
 
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -131,15 +131,15 @@ export default function DashboardPage() {
           setLocationState("READY");
           
           if (dist > settings.allowedRadius) {
-            setMessage(`คุณอยู่นอกพื้นที่บริษัท (${dist} เมตร) ระบบจะบันทึกประวัติ "ตัวแดง" หากกดลงเวลา`);
+            setMessage(language === "th" ? `คุณอยู่นอกพื้นที่บริษัท (${dist} เมตร) ระบบจะบันทึกประวัติ "ตัวแดง" หากกดลงเวลา` : `You are out of bounds (${dist}m). Clocking in will be flagged.`);
           } else {
-            setMessage(`พิกัดถูกต้อง คุณอยู่ในระยะที่กำหนด (${dist} เมตร)`);
+            setMessage(language === "th" ? `พิกัดถูกต้อง คุณอยู่ในระยะที่กำหนด (${dist} เมตร)` : `Location valid. You are within bounds (${dist}m).`);
           }
         },
         (error) => {
           setLocationState("ERROR");
-          if (error.code === 1) setMessage("กรุณาอนุญาตการเข้าถึง GPS");
-          else setMessage("ไม่สามารถดึงพิกัด GPS ได้");
+          if (error.code === 1) setMessage(language === "th" ? "กรุณาอนุญาตการเข้าถึง GPS" : "Please allow GPS access");
+          else setMessage(language === "th" ? "ไม่สามารถดึงพิกัด GPS ได้" : "Could not retrieve GPS location");
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -163,12 +163,12 @@ export default function DashboardPage() {
             setLocationState("IDLE");
             await loadInitialData(); // Reload log
           } else {
-            setMessage(res.message);
+            setMessage(language === "th" ? res.message : (res.message.includes("อยู่นอกช่วงเวลา") ? "Out of allowed time window" : res.message.includes("ไม่อนุญาตให้ลงเวลา") ? "Not allowed to clock in today" : res.message));
           }
           setIsSubmitting(false);
        });
     } catch(e) {
-       setMessage(t("dash_error_submit"));
+       setMessage(t("dash_error_submit") || (language === "th" ? "เกิดข้อผิดพลาด" : "Error occurred"));
        setIsSubmitting(false);
     }
   };
@@ -291,13 +291,13 @@ export default function DashboardPage() {
           onClick={() => setActiveTab("TODAY")}
           className={`flex-1 py-3 rounded-xl font-bold transition-all ${activeTab === "TODAY" ? "neu-pressed text-neu-blue" : "neu-flat text-gray-500 hover:text-gray-700"}`}
         >
-          ลงเวลาวันนี้
+          {t("dash_tab_today")}
         </button>
         <button 
           onClick={() => setActiveTab("HISTORY")}
           className={`flex-1 py-3 rounded-xl font-bold transition-all ${activeTab === "HISTORY" ? "neu-pressed text-neu-blue" : "neu-flat text-gray-500 hover:text-gray-700"}`}
         >
-          ประวัติย้อนหลัง
+          {t("dash_tab_history")}
         </button>
       </div>
 
@@ -349,7 +349,7 @@ export default function DashboardPage() {
                     onClick={() => { setLocationState("IDLE"); setMessage(""); setDistance(null); }}
                     className="w-1/3 neu-btn text-gray-600 font-semibold py-4"
                   >
-                    เช็คใหม่
+                    {t("dash_btn_recheck")}
                   </button>
                   <button 
                     onClick={handleClockAction}
@@ -427,7 +427,7 @@ export default function DashboardPage() {
               <button onClick={handlePrevMonth} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 className="text-lg font-bold text-gray-700">{monthNames[currentMonth - 1]} {currentYear}</h2>
+              <h2 className="text-lg font-bold text-gray-700">{new Date(currentYear, currentMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} {currentYear}</h2>
               <button onClick={handleNextMonth} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
@@ -435,7 +435,7 @@ export default function DashboardPage() {
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-gray-400">
-              <div>อา.</div><div>จ.</div><div>อ.</div><div>พ.</div><div>พฤ.</div><div>ศ.</div><div>ส.</div>
+              {(language === 'th' ? ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']).map(d => <div key={d}>{d}</div>)}
             </div>
             
             <div className="grid grid-cols-7 gap-y-4 gap-x-2">
@@ -479,7 +479,7 @@ export default function DashboardPage() {
           {/* Details Card */}
           <div className="neu-flat p-6 rounded-2xl">
              <h3 className="text-md font-bold text-gray-700 mb-4 text-center">
-               รายละเอียด {selectedDateNum ? `${selectedDateNum} ${monthNames[currentMonth - 1]} ${currentYear}` : ''}
+               {"Details "}{selectedDateNum ? (language === "th" ? `${selectedDateNum} ${new Date(currentYear, currentMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} ${currentYear}` : `${new Date(currentYear, currentMonth - 1, selectedDateNum).toLocaleString("en-US", { month: "long" })} ${selectedDateNum}, ${currentYear}`) : ""}
              </h3>
              
              {isHistoryLoading ? (

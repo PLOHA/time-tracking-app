@@ -125,17 +125,17 @@ export default function AdminDashboardPage() {
 
   const generateCSV = (exportLogs: any[], filename: string) => {
     if (exportLogs.length === 0) {
-      alert("ไม่มีข้อมูลสำหรับส่งออก");
+      alert(language === "th" ? "ไม่มีข้อมูลสำหรับส่งออก" : "No data to export");
       return;
     }
-    const headers = ["วันที่", t("admin_name_placeholder"), "กะทำงาน", "เวลาเข้า", "สถานะเข้า", "ระยะห่างตอนเข้า (เมตร)", "เวลาออก", "สถานะออก", "สาย (นาที)"];
+    const headers = [language === "th" ? "วันที่" : "Date", t("admin_name_placeholder"), language === "th" ? "กะทำงาน" : "Shift Type", language === "th" ? "เวลาเข้า" : "Clock In", language === "th" ? "สถานะเข้า" : "In Status", language === "th" ? "ระยะห่างตอนเข้า (เมตร)" : "In Distance (m)", language === "th" ? "เวลาออก" : "Clock Out", language === "th" ? "สถานะออก" : "Out Status", language === "th" ? "สาย (นาที)" : "Late (min)"];
     
     const rows = exportLogs.map(log => {
        const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
        const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('th-TH') : '-';
        const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('th-TH') : '-';
-       const inStatus = log.clockInFlagged ? "นอกเขต" : "ในเขต";
-       const outStatus = log.clockOutTime ? (log.clockOutFlagged ? "นอกเขต" : "ในเขต") : "-";
+       const inStatus = log.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds");
+       const outStatus = log.clockOutTime ? (log.clockOutFlagged ? t("dash_out_bounds") : t("dash_in_bounds")) : "-";
        
        return [
          dateStr, 
@@ -171,7 +171,7 @@ export default function AdminDashboardPage() {
       const data = await getAdminMonthlyLogs(d.getFullYear(), d.getMonth() + 1);
       generateCSV(data, `timelogs_${d.getFullYear()}_${d.getMonth() + 1}.csv`);
     } catch (e) {
-      alert("เกิดข้อผิดพลาดในการโหลดข้อมูลรายเดือน");
+      alert(language === "th" ? "เกิดข้อผิดพลาดในการโหลดข้อมูลรายเดือน" : "Failed to load monthly data");
     }
     setShowExportMenu(false);
   };
@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
       const res = await updateCompanySettings(settingsData);
       setSettingMsg(res.message);
     } catch (error) {
-      setSettingMsg("เกิดข้อผิดพลาด");
+      setSettingMsg(language === "th" ? "เกิดข้อผิดพลาด" : "Error saving settings");
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setSettingMsg(""), 3000);
@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
         setFormMsg({ text: res.message, isError: true });
       }
     } catch (error) {
-      setFormMsg({ text: "เกิดข้อผิดพลาดในการสร้างพนักงาน", isError: true });
+      setFormMsg({ text: language === "th" ? "เกิดข้อผิดพลาดในการสร้างพนักงาน" : "Failed to create user", isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -293,7 +293,7 @@ export default function AdminDashboardPage() {
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   // --- Chart Data Computation ---
-  const PIE_COLORS = { [t("admin_normal")]: '#10B981', [t("admin_late")]: '#F59E0B', 'นอกพื้นที่': '#EF4444', [t("admin_missing")]: '#9CA3AF' };
+  const PIE_COLORS = { [t("admin_normal")]: '#10B981', [t("admin_late")]: '#F59E0B', [t("dash_out_bounds")]: '#EF4444', [t("admin_missing")]: '#9CA3AF' };
 
   let todayNormal = 0;
   let todayLate = 0;
@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
   const pieData = [
     { name: t("admin_normal"), value: todayNormal },
     { name: t("admin_late"), value: todayLate },
-    { name: 'นอกพื้นที่', value: todayOutOfBounds },
+    { name: t("dash_out_bounds"), value: todayOutOfBounds },
     ...(todayMissing > 0 ? [{ name: t("admin_missing"), value: todayMissing }] : [])
   ].filter(d => d.value > 0);
 
@@ -366,25 +366,25 @@ export default function AdminDashboardPage() {
       {/* Header Card */}
       <div className="max-w-6xl w-full neu-flat p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-700">แดชบอร์ดฝ่ายบุคคล (HR)</h1>
+          <h1 className="text-2xl font-bold text-gray-700">{t("admin_title")}</h1>
           <div className="flex gap-4 mt-4">
             <button 
               onClick={() => setActiveTab("LOGS")}
               className={`px-6 py-2 rounded-lg font-bold transition-all ${activeTab === "LOGS" ? "neu-pressed text-neu-blue" : "text-gray-500 hover:text-gray-700"}`}
             >
-              สรุปการลงเวลา
+              {t("admin_time_logs")}
             </button>
             <button 
               onClick={() => setActiveTab("USERS")}
               className={`px-6 py-2 rounded-lg font-bold transition-all ${activeTab === "USERS" ? "neu-pressed text-neu-blue" : "text-gray-500 hover:text-gray-700"}`}
             >
-              จัดการพนักงาน
+              {t("admin_tab_users")}
             </button>
             <button 
               onClick={() => setActiveTab("SETTINGS")}
               className={`px-6 py-2 rounded-lg font-bold transition-all ${activeTab === "SETTINGS" ? "neu-pressed text-neu-blue" : "text-gray-500 hover:text-gray-700"}`}
             >
-              ตั้งค่าพิกัด
+              {t("admin_tab_settings")}
             </button>
           </div>
         </div>
@@ -401,7 +401,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={toggleTheme}
             className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center"
-            title="เปลี่ยนธีม"
+            title={t("dash_theme")}
           >
             {theme === "default" ? (
                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
@@ -409,8 +409,8 @@ export default function AdminDashboardPage() {
                <svg className="w-5 h-5 text-neu-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             )}
           </button>
-          <button onClick={() => router.push("/dashboard")} className="neu-btn text-gray-600 px-6 py-2 font-medium">กลับหน้าลงเวลา</button>
-          <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-12 h-12 neu-btn text-neu-red flex items-center justify-center" title="ออกจากระบบ">
+          <button onClick={() => router.push("/dashboard")} className="neu-btn text-gray-600 px-6 py-2 font-medium">{language === "th" ? "กลับหน้าลงเวลา" : "Back to Tracking"}</button>
+          <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-12 h-12 neu-btn text-neu-red flex items-center justify-center" title={t("dash_logout")}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           </button>
         </div>
@@ -429,7 +429,7 @@ export default function AdminDashboardPage() {
                  {loading ? (
                     <div className="w-48 h-48 rounded-full border-8 border-gray-200/60 animate-pulse"></div>
                  ) : pieData.length === 0 ? (
-                    <p className="text-gray-400">ไม่มีข้อมูล</p>
+                    <p className="text-gray-400">{t("dash_no_history_calendar")}</p>
                  ) : (
                    <ResponsiveContainer width="100%" height="100%">
                      <PieChart>
@@ -447,7 +447,7 @@ export default function AdminDashboardPage() {
                                    <div key={`item-${index}`} className="flex items-center gap-2 text-sm font-bold">
                                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.payload.fill || entry.color }}></span>
                                      <span className="text-gray-700">{entry.name}:</span>
-                                     <span className="text-gray-900">{entry.value} คน</span>
+                                     <span className="text-gray-900">{entry.value} {t("admin_people")}</span>
                                    </div>
                                  ))}
                                </div>
@@ -465,7 +465,7 @@ export default function AdminDashboardPage() {
 
              {/* Bar Chart */}
              <div className="w-full xl:w-2/3 flex flex-col">
-               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_monthly_stats")} ({language === "th" ? thaiMonths[new Date(targetDate).getMonth()] : new Date(targetDate).toLocaleString("en-US", { month: "long" })})</h2>
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_monthly_stats")} ({new Date(targetDate).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })})</h2>
                <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
                  <div className="h-64" style={{ minWidth: '700px' }}>
                    {isMonthlyLoading ? (
@@ -482,7 +482,7 @@ export default function AdminDashboardPage() {
                              if (active && payload && payload.length) {
                                return (
                                  <div className="neu-flat p-3 rounded-xl bg-neu-bg border-none">
-                                   <p className="text-xs font-bold text-gray-500 mb-2">วันที่ {label}</p>
+                                   <p className="text-xs font-bold text-gray-500 mb-2">{language === "th" ? language === "th" ? "วันที่" : "Date" : "Date"} {label}</p>
                                    {payload.map((entry: any, index: number) => (
                                      <div key={`item-${index}`} className="flex items-center gap-2 text-sm font-bold">
                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></span>
@@ -525,10 +525,10 @@ export default function AdminDashboardPage() {
                 {showExportMenu && (
                   <div className="absolute right-0 mt-2 w-48 neu-flat rounded-xl z-10 overflow-hidden flex flex-col">
                     <button onClick={exportDailyCSV} className="text-left px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-100/50">
-                      โหลดเฉพาะวันนี้
+                      {t("admin_export_daily")}
                     </button>
                     <button onClick={exportMonthlyCSV} className="text-left px-4 py-3 text-sm font-bold text-neu-blue hover:bg-gray-100/50">
-                      โหลดทั้งเดือนนี้
+                      {t("admin_export_monthly")}
                     </button>
                   </div>
                 )}
@@ -601,7 +601,7 @@ export default function AdminDashboardPage() {
                       {/* Status Badge */}
                       <div className="absolute top-4 right-4">
                         {hasRedFlag ? (
-                          <span className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">นอกพื้นที่</span>
+                          <span className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">{t("dash_out_bounds")}</span>
                         ) : (
                           <span className="bg-green-100 text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">{t("admin_normal")}</span>
                         )}
@@ -628,7 +628,7 @@ export default function AdminDashboardPage() {
                             {formatTime(log.clockInTime)}
                           </p>
                           {log.distanceIn !== null && (
-                             <p className="text-xs text-gray-400 mt-1">ห่าง {log.distanceIn} ม.</p>
+                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_in")} {log.distanceIn} {t("admin_meters")}</p>
                           )}
                         </div>
                         <div className="neu-flat p-4 rounded-xl text-center">
@@ -637,7 +637,7 @@ export default function AdminDashboardPage() {
                             {formatTime(log.clockOutTime)}
                           </p>
                           {log.distanceOut !== null && (
-                             <p className="text-xs text-gray-400 mt-1">ห่าง {log.distanceOut} ม.</p>
+                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_out")} {log.distanceOut} {t("admin_meters")}</p>
                           )}
                         </div>
                       </div>
@@ -669,7 +669,7 @@ export default function AdminDashboardPage() {
                       <button onClick={handlePrevCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                       </button>
-                      <h2 className="text-xl font-bold text-gray-700">{language === "th" ? thaiMonths[calMonth - 1] : new Date(calYear, calMonth - 1).toLocaleString("en-US", { month: "long" })} {calYear}</h2>
+                      <h2 className="text-xl font-bold text-gray-700">{new Date(calYear, calMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} {calYear}</h2>
                       <button onClick={handleNextCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                       </button>
@@ -724,7 +724,7 @@ export default function AdminDashboardPage() {
                        <p className="text-sm text-gray-500 text-center py-4">{t("admin_please_select_date")}</p>
                     ) : (() => {
                        const log = getSelectedDayDetails();
-                       if (!log) return <p className="text-sm text-gray-500 text-center py-4">ไม่มีบันทึกการลงเวลาในวันนี้</p>;
+                       if (!log) return <p className="text-sm text-gray-500 text-center py-4">{t("admin_no_logs_today")}</p>;
                        return (
                          <div className="flex flex-col gap-4">
                            <div className="flex justify-between items-center">
@@ -733,7 +733,7 @@ export default function AdminDashboardPage() {
                                <span className={`text-lg font-bold ${log.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
                                  {formatTime(log.clockInTime)}
                                </span>
-                               {log.clockInFlagged && <span className="text-[10px] text-neu-red font-bold">นอกสถานที่</span>}
+                               {log.clockInFlagged && <span className="text-[10px] text-neu-red font-bold">{t("dash_out_bounds")}</span>}
                              </div>
                              <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
                              <div className="flex flex-col items-end">
@@ -741,13 +741,13 @@ export default function AdminDashboardPage() {
                                <span className={`text-lg font-bold ${log.clockOutTime ? (log.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
                                  {formatTime(log.clockOutTime)}
                                </span>
-                               {log.clockOutFlagged && <span className="text-[10px] text-neu-red font-bold">นอกสถานที่</span>}
+                               {log.clockOutFlagged && <span className="text-[10px] text-neu-red font-bold">{t("dash_out_bounds")}</span>}
                              </div>
                            </div>
                            
                            <div className="mt-2 pt-4 border-t border-gray-100 flex justify-between items-center">
                               <span className="text-xs font-bold text-gray-500">
-                                ตอนเข้าห่าง: {log.distanceIn !== null ? `${log.distanceIn} ม.` : '-'} | ตอนออกห่าง: {log.distanceOut !== null ? `${log.distanceOut} ม.` : '-'}
+                                {t("admin_dist_in")} {log.distanceIn !== null ? `${log.distanceIn} ${t("admin_meters")}` : "-"} | {t("admin_dist_out")} {log.distanceOut !== null ? `${log.distanceOut} ${t("admin_meters")}` : "-"}
                               </span>
                               {log.lateness?.isLate && (
                                 <span className="text-xs font-bold text-neu-red bg-red-100 px-2 py-1 rounded-md">
@@ -810,7 +810,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? "กำลังบันทึก..." : t("admin_btn_add_user")}
+                  {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_add_user")}
                 </button>
              </form>
           </div>
@@ -908,7 +908,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? "กำลังบันทึก..." : t("admin_btn_save_settings")}
+                  {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_save_settings")}
                 </button>
              </form>
           )}
