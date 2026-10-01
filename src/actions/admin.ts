@@ -102,6 +102,95 @@ export async function getAdminLogs(dateStr?: string) {
   return enrichedLogs;
 }
 
+export async function getAdminMonthlyLogs(year: number, month: number) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Unauthorized");
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (!user || user.role !== "ADMIN") {
+    throw new Error("Forbidden"); 
+  }
+
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+  const logs = await prisma.timeLog.findMany({
+    where: {
+      recordDate: {
+        gte: startDate,
+        lte: endDate
+      }
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+          shiftType: true,
+        }
+      }
+    },
+    orderBy: [
+      { recordDate: 'asc' },
+      { clockInTime: 'asc' }
+    ]
+  });
+
+  const settings = await prisma.companySetting.findFirst();
+
+  function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371e3;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round(R * c);
+  }
+
+  return logs.map(log => {
+    let distanceIn = null;
+    let distanceOut = null;
+    if (settings && log.clockInLat && log.clockInLng) {
+      distanceIn = calcDistance(log.clockInLat, log.clockInLng, settings.companyLat, settings.companyLng);
+    }
+    if (settings && log.clockOutLat && log.clockOutLng) {
+      distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
+    }
+    
+    // Quick lateness calc
+    let isLate = false;
+    let lateMinutes = 0;
+    if (log.clockInTime) {
+      const time = new Date(log.clockInTime);
+      let expectedHour = 8;
+      if (log.user.shiftType === "SHIFT_MORNING") expectedHour = 6;
+      else if (log.user.shiftType === "SHIFT_NIGHT") expectedHour = 18;
+      
+      const expectedTime = new Date(time);
+      expectedTime.setHours(expectedHour, 0, 0, 0);
+      
+      if (time.getTime() > expectedTime.getTime()) {
+        isLate = true;
+        lateMinutes = Math.floor((time.getTime() - expectedTime.getTime()) / 60000);
+      }
+    }
+
+    return {
+      ...log,
+      distanceIn,
+      distanceOut,
+      lateness: { isLate, text: isLate ? `สาย ${lateMinutes} นาที` : '-' },
+      lateMinutes
+    };
+  });
+}
+
 export async function updateCompanySettings(data: { lat: number, lng: number, radius: number }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Unauthorized");

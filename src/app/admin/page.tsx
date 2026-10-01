@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getAdminLogs, updateCompanySettings } from "@/actions/admin";
+import { getAdminLogs, getAdminMonthlyLogs, updateCompanySettings } from "@/actions/admin";
 import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
 
@@ -15,6 +15,16 @@ export default function AdminDashboardPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filters State for Logs
+  const [targetDate, setTargetDate] = useState(() => {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0); // stable tz
+    return d.toISOString().split('T')[0];
+  });
+  const [shiftFilter, setShiftFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Form State - Users
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,13 +69,13 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") fetchData();
-  }, [status, activeTab]);
+  }, [status, activeTab, targetDate]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (activeTab === "LOGS") {
-        const data = await getAdminLogs();
+        const data = await getAdminLogs(targetDate);
         setLogs(data);
       } else if (activeTab === "USERS") {
         const data = await getUsers();
@@ -83,15 +93,14 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const exportToCSV = () => {
-    if (logs.length === 0) {
+  const generateCSV = (exportLogs: any[], filename: string) => {
+    if (exportLogs.length === 0) {
       alert("ไม่มีข้อมูลสำหรับส่งออก");
       return;
     }
-    
     const headers = ["วันที่", "ชื่อพนักงาน", "กะทำงาน", "เวลาเข้า", "สถานะเข้า", "ระยะห่างตอนเข้า (เมตร)", "เวลาออก", "สถานะออก", "สาย (นาที)"];
     
-    const rows = logs.map(log => {
+    const rows = exportLogs.map(log => {
        const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
        const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('th-TH') : '-';
        const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('th-TH') : '-';
@@ -111,15 +120,30 @@ export default function AdminDashboardPage() {
        ].map(v => `"${v}"`).join(",");
     });
     
-    // \uFEFF is the Byte Order Mark (BOM) needed for Excel to read UTF-8 Thai characters correctly
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `timelogs_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportDailyCSV = () => {
+    generateCSV(filteredLogs, `timelogs_${targetDate}.csv`);
+    setShowExportMenu(false);
+  };
+
+  const exportMonthlyCSV = async () => {
+    try {
+      const d = new Date(targetDate);
+      const data = await getAdminMonthlyLogs(d.getFullYear(), d.getMonth() + 1);
+      generateCSV(data, `timelogs_${d.getFullYear()}_${d.getMonth() + 1}.csv`);
+    } catch (e) {
+      alert("เกิดข้อผิดพลาดในการโหลดข้อมูลรายเดือน");
+    }
+    setShowExportMenu(false);
   };
 
   const handleUpdateSettings = async (e: React.FormEvent) => {
@@ -173,6 +197,12 @@ export default function AdminDashboardPage() {
       setIsSubmitting(false);
     }
   };
+
+  const filteredLogs = logs.filter(log => {
+    if (shiftFilter !== "ALL" && log.user.shiftType !== shiftFilter) return false;
+    if (searchQuery && !log.user.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
 
   if (status === "loading") {
     return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">กำลังโหลดข้อมูล...</div>;
@@ -228,24 +258,76 @@ export default function AdminDashboardPage() {
       {/* Main Content Area */}
       {activeTab === "LOGS" && (
         <div className="max-w-6xl w-full neu-flat p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-700">บันทึกการลงเวลาของวันนี้</h2>
-            <button 
-              onClick={exportToCSV}
-              className="neu-btn px-4 py-2 font-bold text-neu-blue flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              Export Excel (CSV)
-            </button>
+          <div className="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold text-gray-700">บันทึกการลงเวลา</h2>
+              
+              {/* Export Menu */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="neu-btn px-4 py-2 font-bold text-neu-blue flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  Export Excel (CSV)
+                </button>
+                {showExportMenu && (
+                  <div className="absolute right-0 mt-2 w-48 neu-flat rounded-xl z-10 overflow-hidden flex flex-col">
+                    <button onClick={exportDailyCSV} className="text-left px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-100/50">
+                      โหลดเฉพาะวันนี้
+                    </button>
+                    <button onClick={exportMonthlyCSV} className="text-left px-4 py-3 text-sm font-bold text-neu-blue hover:bg-gray-100/50">
+                      โหลดทั้งเดือนนี้
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">เลือกวันที่</label>
+                <input 
+                  type="date" 
+                  value={targetDate} 
+                  onChange={(e) => setTargetDate(e.target.value)} 
+                  className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">กะการทำงาน</label>
+                <select 
+                  value={shiftFilter} 
+                  onChange={(e) => setShiftFilter(e.target.value)} 
+                  className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium appearance-none"
+                >
+                  <option value="ALL">ทั้งหมด</option>
+                  <option value="OFFICE">ออฟฟิศ</option>
+                  <option value="SHIFT_MORNING">กะเช้า</option>
+                  <option value="SHIFT_NIGHT">กะดึก</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">ค้นหาพนักงาน</label>
+                <input 
+                  type="text" 
+                  placeholder="ค้นหาชื่อ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} 
+                  className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium"
+                />
+              </div>
+            </div>
           </div>
           {loading ? (
              <p className="text-center py-8 text-gray-500">กำลังโหลด...</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {logs.length === 0 ? (
+              {filteredLogs.length === 0 ? (
                 <div className="col-span-full text-center py-8 text-gray-400">ยังไม่มีข้อมูลการลงเวลาในวันนี้</div>
               ) : (
-                logs.map((log) => {
+                filteredLogs.map((log) => {
                   const hasRedFlag = log.clockInFlagged || log.clockOutFlagged;
                   return (
                     <div key={log.id} className="neu-pressed rounded-2xl p-6 flex flex-col relative">
