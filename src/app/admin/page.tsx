@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
       alert("ไม่มีข้อมูลสำหรับส่งออก");
       return;
     }
-    const headers = ["วันที่", "ชื่อพนักงาน", "กะทำงาน", "เวลาเข้า", "สถานะเข้า", "ระยะห่างตอนเข้า (เมตร)", "เวลาออก", "สถานะออก", "สาย (นาที)"];
+    const headers = ["วันที่", t("admin_name_placeholder"), "กะทำงาน", "เวลาเข้า", "สถานะเข้า", "ระยะห่างตอนเข้า (เมตร)", "เวลาออก", "สถานะออก", "สาย (นาที)"];
     
     const rows = exportLogs.map(log => {
        const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
@@ -291,7 +291,7 @@ export default function AdminDashboardPage() {
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   // --- Chart Data Computation ---
-  const PIE_COLORS = { 'ปกติ': '#10B981', 'สาย': '#F59E0B', 'นอกพื้นที่': '#EF4444', 'ขาด/ยังไม่ลงเวลา': '#9CA3AF' };
+  const PIE_COLORS = { t("admin_normal"): '#10B981', t("admin_late"): '#F59E0B', 'นอกพื้นที่': '#EF4444', t("admin_missing"): '#9CA3AF' };
 
   let todayNormal = 0;
   let todayLate = 0;
@@ -316,10 +316,10 @@ export default function AdminDashboardPage() {
   }
 
   const pieData = [
-    { name: 'ปกติ', value: todayNormal },
-    { name: 'สาย', value: todayLate },
+    { name: t("admin_normal"), value: todayNormal },
+    { name: t("admin_late"), value: todayLate },
     { name: 'นอกพื้นที่', value: todayOutOfBounds },
-    ...(todayMissing > 0 ? [{ name: 'ขาด/ยังไม่ลงเวลา', value: todayMissing }] : [])
+    ...(todayMissing > 0 ? [{ name: t("admin_missing"), value: todayMissing }] : [])
   ].filter(d => d.value > 0);
 
   // Bar Chart Data (Monthly)
@@ -413,7 +413,7 @@ export default function AdminDashboardPage() {
           <div className="neu-flat p-8 flex flex-col xl:flex-row gap-8">
              {/* Doughnut Chart */}
              <div className="w-full xl:w-1/3 flex flex-col">
-               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">ภาพรวมวันนี้ ({formatDate(targetDate)})</h2>
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_overview_today")} ({formatDate(targetDate)})</h2>
                <div className="h-64 relative flex justify-center items-center">
                  {loading ? (
                     <div className="w-48 h-48 rounded-full border-8 border-gray-200/60 animate-pulse"></div>
@@ -454,7 +454,7 @@ export default function AdminDashboardPage() {
 
              {/* Bar Chart */}
              <div className="w-full xl:w-2/3 flex flex-col">
-               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">สถิติทั้งเดือน ({thaiMonths[new Date(targetDate).getMonth()]})</h2>
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_monthly_stats")} ({language === "th" ? thaiMonths[new Date(targetDate).getMonth()] : new Date(targetDate).toLocaleString("en-US", { month: "long" })})</h2>
                <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
                  <div className="h-64" style={{ minWidth: '700px' }}>
                    {isMonthlyLoading ? (
@@ -486,8 +486,8 @@ export default function AdminDashboardPage() {
                            }}
                          />
                          <Legend verticalAlign="top" height={36}/>
-                         <Bar dataKey="ปกติ" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-                         <Bar dataKey="สาย" stackId="a" fill="#F59E0B" />
+                         <Bar dataKey=t("admin_normal") stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
+                         <Bar dataKey=t("admin_late") stackId="a" fill="#F59E0B" />
                          <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
                        </BarChart>
                      </ResponsiveContainer>
@@ -500,7 +500,7 @@ export default function AdminDashboardPage() {
           <div className="neu-flat p-8">
           <div className="flex flex-col gap-4 mb-6 border-b border-gray-100 pb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-700">บันทึกการลงเวลา</h2>
+              <h2 className="text-lg font-bold text-gray-700">{t("admin_time_logs")}</h2>
               
               {/* Export Menu */}
               <div className="relative">
@@ -527,7 +527,7 @@ export default function AdminDashboardPage() {
             {/* Filter Controls */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">เลือกวันที่</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_filter_date")}</label>
                 <input 
                   type="date" 
                   value={targetDate} 
@@ -536,23 +536,23 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">กะการทำงาน</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_filter_shift")}</label>
                 <select 
                   value={shiftFilter} 
                   onChange={(e) => setShiftFilter(e.target.value)} 
                   className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium appearance-none"
                 >
-                  <option value="ALL">ทั้งหมด</option>
-                  <option value="OFFICE">ออฟฟิศ</option>
-                  <option value="SHIFT_MORNING">กะเช้า</option>
-                  <option value="SHIFT_NIGHT">กะดึก</option>
+                  <option value="ALL">{t("admin_filter_all")}</option>
+                  <option value="OFFICE">{t("admin_filter_office")}</option>
+                  <option value="SHIFT_MORNING">{t("admin_filter_morning")}</option>
+                  <option value="SHIFT_NIGHT">{t("admin_filter_night")}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">ค้นหาพนักงาน</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_search")}</label>
                 <input 
                   type="text" 
-                  placeholder="ค้นหาชื่อ..."
+                  placeholder=t("admin_search_placeholder")
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)} 
                   className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium"
@@ -576,7 +576,7 @@ export default function AdminDashboardPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredLogs.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-400">ยังไม่มีข้อมูลการลงเวลาในวันนี้</div>
+                <div className="col-span-full text-center py-8 text-gray-400">{t("admin_no_logs_today")}</div>
               ) : (
                 filteredLogs.map((log) => {
                   const hasRedFlag = log.clockInFlagged || log.clockOutFlagged;
@@ -592,7 +592,7 @@ export default function AdminDashboardPage() {
                         {hasRedFlag ? (
                           <span className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">นอกพื้นที่</span>
                         ) : (
-                          <span className="bg-green-100 text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">ปกติ</span>
+                          <span className="bg-green-100 text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">{t("admin_normal")}</span>
                         )}
                       </div>
 
@@ -600,7 +600,7 @@ export default function AdminDashboardPage() {
                         <h3 className="text-lg font-bold text-gray-700">{log.user.name}</h3>
                         <div className="flex gap-2 items-center mt-1">
                           <span className="text-sm font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                            {log.user.shiftType === 'OFFICE' ? 'ออฟฟิศ' : log.user.shiftType === 'SHIFT_MORNING' ? 'กะเช้า' : 'กะดึก'}
+                            {log.user.shiftType === 'OFFICE' ? t("admin_filter_office") : log.user.shiftType === 'SHIFT_MORNING' ? t("admin_filter_morning") : t("admin_filter_night")}
                           </span>
                           {log.lateness && (
                             <span className={`text-xs font-bold ${log.lateness.isLate ? 'text-neu-red' : 'text-neu-green'}`}>
@@ -612,7 +612,7 @@ export default function AdminDashboardPage() {
 
                       <div className="grid grid-cols-2 gap-4 mt-auto">
                         <div className="neu-flat p-4 rounded-xl text-center">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">เข้างาน</p>
+                          <p className="text-xs text-gray-500 font-semibold mb-1">{t("admin_clock_in")}</p>
                           <p className={`text-xl font-bold ${log.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
                             {formatTime(log.clockInTime)}
                           </p>
@@ -621,7 +621,7 @@ export default function AdminDashboardPage() {
                           )}
                         </div>
                         <div className="neu-flat p-4 rounded-xl text-center">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">ออกงาน</p>
+                          <p className="text-xs text-gray-500 font-semibold mb-1">{t("admin_clock_out")}</p>
                           <p className={`text-xl font-bold ${log.clockOutTime ? (log.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
                             {formatTime(log.clockOutTime)}
                           </p>
@@ -645,7 +645,7 @@ export default function AdminDashboardPage() {
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-neu-bg">
                   <div>
                     <h3 className="text-lg font-bold text-gray-700">{selectedUser.name}</h3>
-                    <p className="text-sm text-gray-500">ประวัติการลงเวลาส่วนตัว</p>
+                    <p className="text-sm text-gray-500">{t("admin_personal_history")}</p>
                   </div>
                   <button onClick={() => setSelectedUser(null)} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -658,14 +658,14 @@ export default function AdminDashboardPage() {
                       <button onClick={handlePrevCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                       </button>
-                      <h2 className="text-xl font-bold text-gray-700">{thaiMonths[calMonth - 1]} {calYear}</h2>
+                      <h2 className="text-xl font-bold text-gray-700">{language === "th" ? thaiMonths[calMonth - 1] : new Date(calYear, calMonth - 1).toLocaleString("en-US", { month: "long" })} {calYear}</h2>
                       <button onClick={handleNextCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                       </button>
                     </div>
                     
                     <div className="grid grid-cols-7 gap-y-4 text-center">
-                      {['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'].map(d => (
+                      {language === 'th' ? ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
                         <div key={d} className="text-xs font-bold text-gray-400">{d}</div>
                       ))}
                       
@@ -710,7 +710,7 @@ export default function AdminDashboardPage() {
                   <div className="neu-flat rounded-3xl p-6">
                     <h3 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">รายละเอียด</h3>
                     {!calSelectedDate ? (
-                       <p className="text-sm text-gray-500 text-center py-4">โปรดเลือกวันที่บนปฏิทิน</p>
+                       <p className="text-sm text-gray-500 text-center py-4">{t("admin_please_select_date")}</p>
                     ) : (() => {
                        const log = getSelectedDayDetails();
                        if (!log) return <p className="text-sm text-gray-500 text-center py-4">ไม่มีบันทึกการลงเวลาในวันนี้</p>;
@@ -718,7 +718,7 @@ export default function AdminDashboardPage() {
                          <div className="flex flex-col gap-4">
                            <div className="flex justify-between items-center">
                              <div className="flex flex-col">
-                               <span className="text-xs text-gray-500 font-semibold mb-1">เข้างาน</span>
+                               <span className="text-xs text-gray-500 font-semibold mb-1">{t("admin_clock_in")}</span>
                                <span className={`text-lg font-bold ${log.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
                                  {formatTime(log.clockInTime)}
                                </span>
@@ -726,7 +726,7 @@ export default function AdminDashboardPage() {
                              </div>
                              <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
                              <div className="flex flex-col items-end">
-                               <span className="text-xs text-gray-500 font-semibold mb-1">ออกงาน</span>
+                               <span className="text-xs text-gray-500 font-semibold mb-1">{t("admin_clock_out")}</span>
                                <span className={`text-lg font-bold ${log.clockOutTime ? (log.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
                                  {formatTime(log.clockOutTime)}
                                </span>
@@ -761,34 +761,34 @@ export default function AdminDashboardPage() {
           
           {/* Add User Form */}
           <div className="neu-flat p-8 lg:col-span-1 h-fit">
-             <h2 className="text-lg font-bold text-gray-700 mb-6">เพิ่มพนักงานใหม่</h2>
+             <h2 className="text-lg font-bold text-gray-700 mb-6">{t("admin_add_user")}</h2>
              <form onSubmit={handleCreateUser} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ชื่อ-นามสกุล</label>
-                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="ชื่อพนักงาน" />
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_name")}</label>
+                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder=t("admin_name_placeholder") />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">อีเมลสำหรับเข้าสู่ระบบ</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_email")}</label>
                   <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="email@company.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ตั้งรหัสผ่านชั่วคราว</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_password")}</label>
                   <input type="text" required value={formData.passwordRaw} onChange={e => setFormData({...formData, passwordRaw: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="123456" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ประเภทกะการทำงาน</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_shift_type")}</label>
                   <select value={formData.shiftType} onChange={e => setFormData({...formData, shiftType: e.target.value as any})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 appearance-none">
-                    <option value="OFFICE">พนักงานออฟฟิศ (จันทร์-ศุกร์)</option>
-                    <option value="SHIFT_MORNING">กะเช้า (ทำ 4 หยุด 2)</option>
-                    <option value="SHIFT_NIGHT">กะดึก (ทำ 4 หยุด 2)</option>
+                    <option value="OFFICE">{t("admin_office_desc")}</option>
+                    <option value="SHIFT_MORNING">{t("admin_morning_desc")}</option>
+                    <option value="SHIFT_NIGHT">{t("admin_night_desc")}</option>
                   </select>
                 </div>
 
                 {formData.shiftType !== "OFFICE" && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">วันที่เริ่มกะแรก (Cycle Start)</label>
+                    <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_cycle_start")}</label>
                     <input type="date" required value={formData.cycleStartDate} onChange={e => setFormData({...formData, cycleStartDate: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" />
-                    <p className="text-xs text-gray-500 mt-2 px-1">ระบบจะใช้วันนี้เป็นวันที่ 1 ในการรันลูป 4 หยุด 2</p>
+                    <p className="text-xs text-gray-500 mt-2 px-1">{t("admin_cycle_desc")}</p>
                   </div>
                 )}
 
@@ -799,14 +799,14 @@ export default function AdminDashboardPage() {
                 )}
 
                 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? "กำลังบันทึก..." : "เพิ่มพนักงาน"}
+                  {isSubmitting ? "กำลังบันทึก..." : t("admin_btn_add_user")}
                 </button>
              </form>
           </div>
 
           {/* User List Table */}
           <div className="neu-flat p-8 lg:col-span-2">
-            <h2 className="text-lg font-bold text-gray-700 mb-6">รายชื่อพนักงานทั้งหมด</h2>
+            <h2 className="text-lg font-bold text-gray-700 mb-6">{t("admin_all_users")}</h2>
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
                 {[1, 2, 3, 4].map(i => (
@@ -834,13 +834,13 @@ export default function AdminDashboardPage() {
                     
                     <div className="grid grid-cols-2 gap-4 mt-auto">
                       <div className="neu-flat p-4 rounded-xl text-center flex flex-col justify-center">
-                        <p className="text-xs text-gray-500 font-semibold mb-1">กะการทำงาน</p>
+                        <p className="text-xs text-gray-500 font-semibold mb-1">{t("admin_filter_shift")}</p>
                         <p className="text-sm font-bold text-neu-blue">
-                          {u.shiftType === "OFFICE" ? "ออฟฟิศ" : u.shiftType === "SHIFT_MORNING" ? "กะเช้า" : "กะดึก"}
+                          {u.shiftType === "OFFICE" ? t("admin_filter_office") : u.shiftType === "SHIFT_MORNING" ? t("admin_filter_morning") : t("admin_filter_night")}
                         </p>
                       </div>
                       <div className="neu-flat p-4 rounded-xl text-center flex flex-col justify-center">
-                        <p className="text-xs text-gray-500 font-semibold mb-1">รอบกะแรก</p>
+                        <p className="text-xs text-gray-500 font-semibold mb-1">{t("admin_first_cycle")}</p>
                         <p className="text-sm font-bold text-gray-700">
                           {u.shiftType === "OFFICE" ? "-" : formatDate(u.cycleStartDate)}
                         </p>
@@ -857,7 +857,7 @@ export default function AdminDashboardPage() {
 
       {activeTab === "SETTINGS" && (
         <div className="max-w-2xl w-full neu-flat p-8">
-          <h2 className="text-lg font-bold text-gray-700 mb-6">ตั้งค่าพิกัดบริษัท (GPS)</h2>
+          <h2 className="text-lg font-bold text-gray-700 mb-6">{t("admin_settings_title")}</h2>
           {loading ? (
              <div className="space-y-6 animate-pulse">
                 <div className="space-y-2">
@@ -877,17 +877,17 @@ export default function AdminDashboardPage() {
           ) : (
              <form onSubmit={handleUpdateSettings} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ละติจูด (Latitude)</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_lat")}</label>
                   <input type="number" step="any" required value={Number.isNaN(settingsData.lat) ? '' : settingsData.lat} onChange={e => setSettingsData({...settingsData, lat: e.target.value === '' ? NaN : parseFloat(e.target.value)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="13.7563" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ลองจิจูด (Longitude)</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_lng")}</label>
                   <input type="number" step="any" required value={Number.isNaN(settingsData.lng) ? '' : settingsData.lng} onChange={e => setSettingsData({...settingsData, lng: e.target.value === '' ? NaN : parseFloat(e.target.value)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="100.5018" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ระยะทางที่อนุญาต (เมตร)</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_radius")}</label>
                   <input type="number" required value={Number.isNaN(settingsData.radius) ? '' : settingsData.radius} onChange={e => setSettingsData({...settingsData, radius: e.target.value === '' ? NaN : parseInt(e.target.value, 10)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="500" />
-                  <p className="text-xs text-gray-500 mt-2 px-1">พนักงานที่กดลงเวลานอกรัศมีนี้ ระบบจะบันทึกสถานะ "ตัวแดง" (นอกพื้นที่)</p>
+                  <p className="text-xs text-gray-500 mt-2 px-1">{t("admin_radius_desc")}</p>
                 </div>
 
                 {settingMsg && (
@@ -897,7 +897,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+                  {isSubmitting ? "กำลังบันทึก..." : t("admin_btn_save_settings")}
                 </button>
              </form>
           )}

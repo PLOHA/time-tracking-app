@@ -19,6 +19,7 @@ function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2
 }
 
 export default function DashboardPage() {
+  const { t, language, setLanguage } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -143,7 +144,7 @@ export default function DashboardPage() {
       );
     } else {
       setLocationState("ERROR");
-      setMessage("เบราว์เซอร์ของคุณไม่รองรับ GPS");
+      setMessage(t("dash_gps_error"));
     }
   };
 
@@ -157,7 +158,7 @@ export default function DashboardPage() {
           const res = await actionFn(pos.coords.latitude, pos.coords.longitude, distance, settings.allowedRadius);
           
           if (res.success) {
-            setMessage(res.flagged ? `ลงเวลาสำเร็จ (สถานะตัวแดงนอกพื้นที่)` : `ลงเวลาสำเร็จ!`);
+            setMessage(res.flagged ? t("dash_success_red") : t("dash_success"));
             setLocationState("IDLE");
             await loadInitialData(); // Reload log
           } else {
@@ -166,7 +167,7 @@ export default function DashboardPage() {
           setIsSubmitting(false);
        });
     } catch(e) {
-       setMessage("เกิดข้อผิดพลาดในการลงเวลา");
+       setMessage(t("dash_error_submit"));
        setIsSubmitting(false);
     }
   };
@@ -221,14 +222,14 @@ export default function DashboardPage() {
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
       <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold text-gray-700">ระบบลงเวลาทำงาน</h1>
-          <p className="text-sm text-neu-blue font-medium mt-1">ยินดีต้อนรับ, {session?.user?.name}</p>
+          <h1 className="text-xl font-bold text-gray-700">{t("dash_title")}</h1>
+          <p className="text-sm text-neu-blue font-medium mt-1">{t("dash_welcome")} {session?.user?.name}</p>
         </div>
         <div className="flex gap-4">
           <button
             onClick={toggleTheme}
             className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center"
-            title="เปลี่ยนธีม"
+            title=t("dash_theme")
           >
             {theme === "default" ? (
                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
@@ -242,10 +243,10 @@ export default function DashboardPage() {
               await loadInitialData();
               setLocationState("IDLE");
               setDistance(null);
-              setMessage("รีเซ็ตข้อมูลเรียบร้อยแล้ว");
+              setMessage(t("dash_reset_success"));
             }}
             className="w-12 h-12 neu-btn text-neu-blue flex items-center justify-center"
-            title="ลบข้อมูลวันนี้ (สำหรับทดสอบ)"
+            title=t("dash_reset")
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>
@@ -253,7 +254,7 @@ export default function DashboardPage() {
             <button
               onClick={() => router.push("/admin")}
               className="w-12 h-12 neu-btn text-gray-700 flex items-center justify-center"
-              title="แดชบอร์ดผู้ดูแลระบบ"
+              title=t("dash_admin")
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
@@ -261,7 +262,7 @@ export default function DashboardPage() {
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="w-12 h-12 neu-btn text-neu-red flex items-center justify-center"
-            title="ออกจากระบบ"
+            title=t("dash_logout")
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           </button>
@@ -292,19 +293,19 @@ export default function DashboardPage() {
             <div className="w-24 h-24 mx-auto neu-flat rounded-full flex items-center justify-center mb-6 text-neu-green">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-700">เสร็จสิ้นภารกิจวันนี้!</h2>
-            <p className="text-sm text-gray-500 mt-2">คุณได้ลงเวลาเข้าและออกงานครบถ้วนแล้ว</p>
+            <h2 className="text-xl font-bold text-gray-700">{t("dash_mission_complete")}</h2>
+            <p className="text-sm text-gray-500 mt-2">{t("dash_mission_desc")}</p>
           </div>
         ) : (
           <>
             <div className={`w-40 h-40 rounded-full flex items-center justify-center mb-8 transition-all duration-500 ${locationState === 'READY' ? (distance && distance <= settings.allowedRadius ? 'text-neu-green shadow-neu-pressed' : 'text-neu-red shadow-neu-pressed') : 'text-gray-400 neu-flat'}`}>
               <div className="text-center">
-                  {locationState === 'IDLE' && <div className="text-sm font-semibold">รอการดึงพิกัด</div>}
-                  {locationState === 'LOCATING' && <div className="text-sm font-semibold animate-pulse">กำลังคำนวณ...</div>}
+                  {locationState === 'IDLE' && <div className="text-sm font-semibold">{t("dash_loc_waiting")}</div>}
+                  {locationState === 'LOCATING' && <div className="text-sm font-semibold animate-pulse">{t("dash_loc_calculating")}</div>}
                   {locationState === 'READY' && (
                     <>
                       <div className="text-3xl font-bold">{distance}</div>
-                      <div className="text-xs mt-1">เมตร</div>
+                      <div className="text-xs mt-1">{t("dash_meters")}</div>
                     </>
                   )}
               </div>
@@ -323,7 +324,7 @@ export default function DashboardPage() {
                   disabled={locationState === "LOCATING"}
                   className="w-full neu-btn text-neu-blue font-bold py-4 px-4 text-lg"
                 >
-                  {locationState === "LOCATING" ? "กำลังค้นหาพิกัด..." : (hasClockedIn ? "เช็คพิกัด เพื่อลงเวลาออก" : "เช็คพิกัด เพื่อลงเวลาเข้า")}
+                  {locationState === "LOCATING" ? t("dash_locating") : (hasClockedIn ? t("dash_btn_locate_out") : t("dash_btn_locate_in"))}
                 </button>
               ) : (
                 <div className="flex gap-4">
@@ -338,7 +339,7 @@ export default function DashboardPage() {
                     disabled={isSubmitting}
                     className={`w-2/3 neu-btn font-bold py-4 text-lg ${distance && distance <= settings.allowedRadius ? 'text-neu-green' : 'text-neu-red'}`}
                   >
-                    {isSubmitting ? "กำลังบันทึก..." : (hasClockedIn ? "ลงเวลาออกงาน" : "ลงเวลาเข้างาน")}
+                    {isSubmitting ? t("dash_btn_submitting") : (hasClockedIn ? t("dash_btn_clock_out") : t("dash_btn_clock_in"))}
                   </button>
                 </div>
               )}
@@ -350,15 +351,15 @@ export default function DashboardPage() {
       {/* Close TODAY block */}
       {activeTab === "TODAY" && hasClockedIn && (
         <div className="max-w-md w-full neu-flat p-6 mt-8">
-          <h2 className="text-lg font-bold text-gray-700 mb-4 text-center">ประวัติการลงเวลาวันนี้</h2>
+          <h2 className="text-lg font-bold text-gray-700 mb-4 text-center">{t("dash_history_today")}</h2>
           <div className="space-y-4">
             
             <div className="flex justify-between items-center border-b border-gray-200 pb-2">
-              <span className="text-sm font-semibold text-gray-500">เวลาเข้างาน:</span>
+              <span className="text-sm font-semibold text-gray-500">{t("dash_time_in")}</span>
               <div className="text-right flex flex-col items-end">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${todayLog.clockInFlagged ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                    {todayLog.clockInFlagged ? 'นอกเขต' : 'ในเขต'}
+                    {todayLog.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                   </span>
                   <span className={`font-bold text-lg ${todayLog.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
                     {new Date(todayLog.clockInTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
@@ -376,12 +377,12 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex justify-between items-center pt-2">
-              <span className="text-sm font-semibold text-gray-500">เวลาออกงาน:</span>
+              <span className="text-sm font-semibold text-gray-500">{t("dash_time_out")}</span>
               <div className="text-right flex flex-col items-end">
                 <div className="flex items-center gap-2">
                   {todayLog.clockOutTime && (
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${todayLog.clockOutFlagged ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                      {todayLog.clockOutFlagged ? 'นอกเขต' : 'ในเขต'}
+                      {todayLog.clockOutFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                     </span>
                   )}
                   <span className={`font-bold text-lg ${todayLog.clockOutTime ? (todayLog.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
@@ -389,7 +390,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 {todayLog.clockOutTime && (
-                  <p className="text-xs font-medium text-gray-500">บันทึกเวลาออกสำเร็จ</p>
+                  <p className="text-xs font-medium text-gray-500">{t("dash_clock_out_success")}</p>
                 )}
               </div>
             </div>
@@ -483,11 +484,11 @@ export default function DashboardPage() {
              ) : selectedLog ? (
                <div className="space-y-4">
                   <div className="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <span className="text-sm font-semibold text-gray-500">เวลาเข้างาน:</span>
+                    <span className="text-sm font-semibold text-gray-500">{t("dash_time_in")}</span>
                     <div className="text-right flex flex-col items-end">
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${selectedLog.clockInFlagged ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                          {selectedLog.clockInFlagged ? 'นอกเขต' : 'ในเขต'}
+                          {selectedLog.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                         </span>
                         <span className={`font-bold text-lg ${selectedLog.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
                           {new Date(selectedLog.clockInTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
@@ -505,12 +506,12 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex justify-between items-center pt-2">
-                    <span className="text-sm font-semibold text-gray-500">เวลาออกงาน:</span>
+                    <span className="text-sm font-semibold text-gray-500">{t("dash_time_out")}</span>
                     <div className="text-right flex flex-col items-end">
                       <div className="flex items-center gap-2">
                         {selectedLog.clockOutTime && (
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${selectedLog.clockOutFlagged ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                            {selectedLog.clockOutFlagged ? 'นอกเขต' : 'ในเขต'}
+                            {selectedLog.clockOutFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                           </span>
                         )}
                         <span className={`font-bold text-lg ${selectedLog.clockOutTime ? (selectedLog.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
@@ -521,7 +522,7 @@ export default function DashboardPage() {
                   </div>
                </div>
              ) : (
-               <p className="text-center text-sm text-gray-400 py-4">ไม่มีประวัติการลงเวลาในวันนี้</p>
+               <p className="text-center text-sm text-gray-400 py-4">{t("dash_no_history_today")}</p>
              )}
           </div>
         </div>
