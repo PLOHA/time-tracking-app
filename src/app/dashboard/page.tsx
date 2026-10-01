@@ -246,12 +246,12 @@ export default function DashboardPage() {
     <>
       {effects && <AnimatedBackground />}
       <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
-        <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center">
+        <div className="max-w-md w-full neu-flat p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-700">{t("dash_title")}</h1>
+            <h1 className="text-xl font-bold text-gray-700 leading-tight">{t("dash_title")}</h1>
             <p className="text-sm text-neu-blue font-medium mt-1">{t("dash_welcome")} {session?.user?.name}</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3 justify-start md:justify-end w-full md:w-auto">
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
