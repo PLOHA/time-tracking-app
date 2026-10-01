@@ -389,6 +389,15 @@ export default function AdminDashboardPage() {
           </div>
         </div>
         <div className="flex gap-4">
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
+            className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center font-bold text-sm"
+            title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
+          >
+            {language === 'th' ? 'TH' : 'EN'}
+          </button>
+          
           <button
             onClick={toggleTheme}
             className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center"
