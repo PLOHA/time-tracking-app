@@ -3,12 +3,14 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageContext";
 import { getAdminLogs, getAdminMonthlyLogs, updateCompanySettings } from "@/actions/admin";
 import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 
 export default function AdminDashboardPage() {
+  const { t, language } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   
@@ -291,7 +293,7 @@ export default function AdminDashboardPage() {
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   // --- Chart Data Computation ---
-  const PIE_COLORS = { t("admin_normal"): '#10B981', t("admin_late"): '#F59E0B', 'นอกพื้นที่': '#EF4444', t("admin_missing"): '#9CA3AF' };
+  const PIE_COLORS = { [t("admin_normal")]: '#10B981', [t("admin_late")]: '#F59E0B', 'นอกพื้นที่': '#EF4444', [t("admin_missing")]: '#9CA3AF' };
 
   let todayNormal = 0;
   let todayLate = 0;
@@ -486,8 +488,8 @@ export default function AdminDashboardPage() {
                            }}
                          />
                          <Legend verticalAlign="top" height={36}/>
-                         <Bar dataKey=t("admin_normal") stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-                         <Bar dataKey=t("admin_late") stackId="a" fill="#F59E0B" />
+                         <Bar dataKey={t("admin_normal")} stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
+                         <Bar dataKey={t("admin_late")} stackId="a" fill="#F59E0B" />
                          <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
                        </BarChart>
                      </ResponsiveContainer>
@@ -552,7 +554,7 @@ export default function AdminDashboardPage() {
                 <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_search")}</label>
                 <input 
                   type="text" 
-                  placeholder=t("admin_search_placeholder")
+                  placeholder={t("admin_search_placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)} 
                   className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium"
@@ -765,7 +767,7 @@ export default function AdminDashboardPage() {
              <form onSubmit={handleCreateUser} className="space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_name")}</label>
-                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder=t("admin_name_placeholder") />
+                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder={t("admin_name_placeholder")} />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_email")}</label>
