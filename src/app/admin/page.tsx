@@ -719,7 +719,7 @@ export default function AdminDashboardPage() {
 
                   {/* Day Details */}
                   <div className="neu-flat rounded-3xl p-6">
-                    <h3 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">รายละเอียด</h3>
+                    <h3 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("dash_calendar_details")}</h3>
                     {!calSelectedDate ? (
                        <p className="text-sm text-gray-500 text-center py-4">{t("admin_please_select_date")}</p>
                     ) : (() => {
