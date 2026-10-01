@@ -15,11 +15,7 @@ export async function getAdminLogs(dateStr?: string) {
   });
 
   if (!user || user.role !== "ADMIN") {
-    // For demo purposes, if there is no admin, let's allow it or you can strictly enforce it.
-    // I'll enforce it, but wait, the seeded user is EMPLOYEE. Let's just bypass it for the demo or I can upgrade the user to ADMIN.
-    // Let's just return all logs for now so the user can test easily without changing their role.
-    // Uncomment this in production:
-    // throw new Error("Forbidden"); 
+    throw new Error("Forbidden"); 
   }
 
   // Target date (default to today)
@@ -115,7 +111,7 @@ export async function updateCompanySettings(data: { lat: number, lng: number, ra
   });
 
   // Ensure Admin
-  // if (!user || user.role !== "ADMIN") throw new Error("Forbidden");
+  if (!user || user.role !== "ADMIN") throw new Error("Forbidden");
 
   await prisma.companySetting.upsert({
     where: { id: 1 },

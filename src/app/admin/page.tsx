@@ -30,8 +30,12 @@ export default function AdminDashboardPage() {
   const [theme, setTheme] = useState("default");
 
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-  }, [status, router]);
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated" && (session?.user as any)?.role !== "ADMIN") {
+      router.push("/dashboard");
+    }
+  }, [status, router, session]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
