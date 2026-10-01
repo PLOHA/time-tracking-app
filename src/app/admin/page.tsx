@@ -87,8 +87,13 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       if (activeTab === "LOGS") {
-        const data = await getAdminLogs(targetDate);
+        const [data, usersData] = await Promise.all([
+          getAdminLogs(targetDate),
+          users.length === 0 ? getUsers() : Promise.resolve(users)
+        ]);
         setLogs(data);
+        if (users.length === 0) setUsers(usersData);
+        
         setIsMonthlyLoading(true);
         try {
           const d = new Date(targetDate);
@@ -99,8 +104,10 @@ export default function AdminDashboardPage() {
         }
         setIsMonthlyLoading(false);
       } else if (activeTab === "USERS") {
-        const data = await getUsers();
-        setUsers(data);
+        if (users.length === 0) {
+          const data = await getUsers();
+          setUsers(data);
+        }
       } else if (activeTab === "SETTINGS") {
         const data = await getCompanySettings();
         if (data) {
@@ -291,13 +298,15 @@ export default function AdminDashboardPage() {
   let todayOutOfBounds = 0;
   let todayMissing = 0;
 
-  if (filteredLogs.length > 0 && users.length > 0) {
-    const activeUsers = users.filter(u => {
-      if (shiftFilter !== "ALL" && u.shiftType !== shiftFilter) return false;
-      if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    });
-    todayMissing = Math.max(0, activeUsers.length - filteredLogs.length);
+  if (filteredLogs.length > 0) {
+    if (users.length > 0) {
+      const activeUsers = users.filter(u => {
+        if (shiftFilter !== "ALL" && u.shiftType !== shiftFilter) return false;
+        if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      });
+      todayMissing = Math.max(0, activeUsers.length - filteredLogs.length);
+    }
     
     filteredLogs.forEach(log => {
       if (log.clockInFlagged || log.clockOutFlagged) todayOutOfBounds++;
