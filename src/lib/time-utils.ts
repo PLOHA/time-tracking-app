@@ -20,7 +20,7 @@ export function calculateLateness(clockInTime: Date | string | null, shiftType: 
   } else {
     const diffMs = expectedTime.getTime() - time.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    return { isLate: false, minutesLate: 0, text: `เข้าก่อน ${diffMins} นาที` };
+    return { isLate: false, minutesLate: diffMins, text: `เข้าก่อน ${diffMins} นาที` };
   }
 }
 
