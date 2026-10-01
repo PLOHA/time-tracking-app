@@ -455,42 +455,44 @@ export default function AdminDashboardPage() {
              {/* Bar Chart */}
              <div className="w-full xl:w-2/3 flex flex-col">
                <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">สถิติทั้งเดือน ({thaiMonths[new Date(targetDate).getMonth()]})</h2>
-               <div className="h-64">
-                 {isMonthlyLoading ? (
-                    <div className="w-full h-full bg-gray-200/60 rounded-xl animate-pulse"></div>
-                 ) : (
-                   <ResponsiveContainer width="100%" height="100%">
-                     <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                       <XAxis dataKey="date" tick={{fontSize: 12}} axisLine={false} tickLine={false} interval={0} />
-                       <YAxis tick={{fontSize: 12}} axisLine={false} tickLine={false} />
-                       <RechartsTooltip 
-                         cursor={{fill: 'rgba(0,0,0,0.05)'}} 
-                         content={({ active, payload, label }) => {
-                           if (active && payload && payload.length) {
-                             return (
-                               <div className="neu-flat p-3 rounded-xl bg-neu-bg border-none">
-                                 <p className="text-xs font-bold text-gray-500 mb-2">วันที่ {label}</p>
-                                 {payload.map((entry: any, index: number) => (
-                                   <div key={`item-${index}`} className="flex items-center gap-2 text-sm font-bold">
-                                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></span>
-                                     <span className="text-gray-700">{entry.name}:</span>
-                                     <span className="text-gray-900">{entry.value}</span>
-                                   </div>
-                                 ))}
-                               </div>
-                             );
-                           }
-                           return null;
-                         }}
-                       />
-                       <Legend verticalAlign="top" height={36}/>
-                       <Bar dataKey="ปกติ" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-                       <Bar dataKey="สาย" stackId="a" fill="#F59E0B" />
-                       <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                     </BarChart>
-                   </ResponsiveContainer>
-                 )}
+               <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+                 <div className="h-64" style={{ minWidth: '700px' }}>
+                   {isMonthlyLoading ? (
+                      <div className="w-full h-full bg-gray-200/60 rounded-xl animate-pulse"></div>
+                   ) : (
+                     <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                         <XAxis dataKey="date" tick={{fontSize: 12}} axisLine={false} tickLine={false} interval={0} />
+                         <YAxis tick={{fontSize: 12}} axisLine={false} tickLine={false} />
+                         <RechartsTooltip 
+                           cursor={{fill: 'rgba(0,0,0,0.05)'}} 
+                           content={({ active, payload, label }) => {
+                             if (active && payload && payload.length) {
+                               return (
+                                 <div className="neu-flat p-3 rounded-xl bg-neu-bg border-none">
+                                   <p className="text-xs font-bold text-gray-500 mb-2">วันที่ {label}</p>
+                                   {payload.map((entry: any, index: number) => (
+                                     <div key={`item-${index}`} className="flex items-center gap-2 text-sm font-bold">
+                                       <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></span>
+                                       <span className="text-gray-700">{entry.name}:</span>
+                                       <span className="text-gray-900">{entry.value}</span>
+                                     </div>
+                                   ))}
+                                 </div>
+                               );
+                             }
+                             return null;
+                           }}
+                         />
+                         <Legend verticalAlign="top" height={36}/>
+                         <Bar dataKey="ปกติ" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
+                         <Bar dataKey="สาย" stackId="a" fill="#F59E0B" />
+                         <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                       </BarChart>
+                     </ResponsiveContainer>
+                   )}
+                 </div>
                </div>
              </div>
           </div>
