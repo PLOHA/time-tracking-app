@@ -7,6 +7,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import { getCompanySettings, clockIn, clockOut, getTodayLog, clearMyLogs, getMyHistory } from "@/actions/time-tracking";
 import { calculateLateness } from "@/lib/time-utils";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { formatDuration, formatDistance } from "@/lib/format-utils";
 
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
@@ -355,8 +356,8 @@ export default function DashboardPage() {
                   {locationState === 'LOCATING' && <div className="text-sm font-semibold animate-pulse">{t("dash_loc_calculating")}</div>}
                   {locationState === 'READY' && (
                     <>
-                      <div className="text-3xl font-bold">{distance}</div>
-                      <div className="text-xs mt-1">{t("dash_meters")}</div>
+                      <div className="text-2xl font-bold leading-tight px-2">{formatDistance(distance, language)}</div>
+                      <div className="text-[10px] mt-1 text-gray-500 font-semibold uppercase tracking-wider">{language === "th" ? "ระยะห่าง" : "Distance"}</div>
                     </>
                   )}
               </div>
@@ -417,10 +418,10 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 {(() => {
-                  const { isLate, text } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || (session?.user as any)?.shiftType || "OFFICE");
+                  const { isLate, minutesLate } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || (session?.user as any)?.shiftType || "OFFICE");
                   return (
                     <p className={`text-xs font-bold ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
-                      {text}
+                      {formatDuration(minutesLate, language, isLate)}
                     </p>
                   );
                 })()}
@@ -546,10 +547,10 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       {(() => {
-                        const { isLate, text } = calculateLateness(selectedLog.clockInTime, selectedLog.user.shiftType);
+                        const { isLate, minutesLate } = calculateLateness(selectedLog.clockInTime, selectedLog.user.shiftType);
                         return (
                           <p className={`text-xs font-bold ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
-                            {text}
+                            {formatDuration(minutesLate, language, isLate)}
                           </p>
                         );
                       })()}

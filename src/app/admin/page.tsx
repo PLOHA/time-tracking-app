@@ -9,6 +9,7 @@ import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { formatDuration, formatDistance } from "@/lib/format-utils";
 
 export default function AdminDashboardPage() {
   const { t, language, setLanguage } = useLanguage();
@@ -673,7 +674,7 @@ export default function AdminDashboardPage() {
                           </span>
                           {log.lateness && (
                             <span className={`text-xs font-bold ${log.lateness.isLate ? 'text-neu-red' : 'text-neu-green'}`}>
-                              {language === "th" ? log.lateness.text : (log.lateness.minutesLate === 0 ? "On time" : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`))}
+                              {formatDuration(log.lateness.minutesLate, language, log.lateness.isLate)}
                             </span>
                           )}
                         </div>
@@ -686,7 +687,7 @@ export default function AdminDashboardPage() {
                             {formatTime(log.clockInTime)}
                           </p>
                           {log.distanceIn !== null && (
-                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_in")} {log.distanceIn} {t("admin_meters")}</p>
+                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_in")} {formatDistance(log.distanceIn, language)}</p>
                           )}
                         </div>
                         <div className="neu-flat p-4 rounded-xl text-center">
@@ -695,7 +696,7 @@ export default function AdminDashboardPage() {
                             {formatTime(log.clockOutTime)}
                           </p>
                           {log.distanceOut !== null && (
-                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_out")} {log.distanceOut} {t("admin_meters")}</p>
+                             <p className="text-xs text-gray-400 mt-1">{t("admin_dist_out")} {formatDistance(log.distanceOut, language)}</p>
                           )}
                         </div>
                       </div>
@@ -959,11 +960,11 @@ export default function AdminDashboardPage() {
                            
                            <div className="mt-2 pt-4 border-t border-gray-100 flex justify-between items-center">
                               <span className="text-xs font-bold text-gray-500">
-                                {t("admin_dist_in")} {log.distanceIn !== null ? `${log.distanceIn} ${t("admin_meters")}` : "-"} | {t("admin_dist_out")} {log.distanceOut !== null ? `${log.distanceOut} ${t("admin_meters")}` : "-"}
+                                {t("admin_dist_in")} {formatDistance(log.distanceIn, language)} | {t("admin_dist_out")} {formatDistance(log.distanceOut, language)}
                               </span>
                               {log.lateness?.isLate && (
                                 <span className="text-xs font-bold text-neu-red bg-red-100 px-2 py-1 rounded-md">
-                                  {language === "th" ? log.lateness.text : (log.lateness.minutesLate === 0 ? "On time" : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`))}
+                                  {formatDuration(log.lateness.minutesLate, language, log.lateness.isLate)}
                                 </span>
                               )}
                            </div>
