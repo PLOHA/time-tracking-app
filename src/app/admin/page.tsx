@@ -10,7 +10,7 @@ import { getCompanySettings } from "@/actions/time-tracking";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 
 export default function AdminDashboardPage() {
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   
