@@ -8,6 +8,7 @@ import { getAdminLogs, getAdminMonthlyLogs, updateCompanySettings } from "@/acti
 import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 export default function AdminDashboardPage() {
   const { t, language, setLanguage } = useLanguage();
@@ -52,6 +53,7 @@ export default function AdminDashboardPage() {
   const [settingMsg, setSettingMsg] = useState("");
 
   const [theme, setTheme] = useState("default");
+  const [effects, setEffects] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -67,6 +69,15 @@ export default function AdminDashboardPage() {
       setTheme("seagate");
       document.documentElement.setAttribute("data-theme", "seagate");
     }
+
+    const savedEffects = localStorage.getItem("ui-effects");
+    if (savedEffects === "disabled") {
+      setEffects(false);
+      document.documentElement.setAttribute("data-effects", "false");
+    } else {
+      setEffects(true);
+      document.documentElement.setAttribute("data-effects", "true");
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -78,6 +89,18 @@ export default function AdminDashboardPage() {
       setTheme("default");
       localStorage.setItem("theme", "default");
       document.documentElement.removeAttribute("data-theme");
+    }
+  };
+
+  const toggleEffects = () => {
+    const newVal = !effects;
+    setEffects(newVal);
+    if (newVal) {
+      localStorage.setItem("ui-effects", "enabled");
+      document.documentElement.setAttribute("data-effects", "true");
+    } else {
+      localStorage.setItem("ui-effects", "disabled");
+      document.documentElement.setAttribute("data-effects", "false");
     }
   };
 
@@ -361,7 +384,9 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+    <>
+      {effects && <AnimatedBackground />}
+      <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
       
       {/* Header Card */}
       <div className="max-w-6xl w-full neu-flat p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -396,6 +421,15 @@ export default function AdminDashboardPage() {
             title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
           >
             {language === 'th' ? 'TH' : 'EN'}
+          </button>
+
+          {/* Effects Toggle */}
+          <button
+            onClick={toggleEffects}
+            className={`w-12 h-12 neu-btn flex items-center justify-center ${effects ? 'text-neu-blue' : 'text-gray-400'}`}
+            title={effects ? (language === 'th' ? 'ปิดเอฟเฟกต์พื้นหลัง' : 'Disable background effects') : (language === 'th' ? 'เปิดเอฟเฟกต์พื้นหลัง' : 'Enable background effects')}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
           </button>
           
           <button
@@ -916,5 +950,6 @@ export default function AdminDashboardPage() {
       )}
 
     </div>
+    </>
   );
 }

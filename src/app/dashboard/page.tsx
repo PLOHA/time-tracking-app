@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import { getCompanySettings, clockIn, clockOut, getTodayLog, clearMyLogs, getMyHistory } from "@/actions/time-tracking";
 import { calculateLateness } from "@/lib/time-utils";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
@@ -42,8 +43,9 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
-  // Theme Toggle Logic
+  // Theme & Effects Toggle Logic
   const [theme, setTheme] = useState("default");
+  const [effects, setEffects] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -54,6 +56,15 @@ export default function DashboardPage() {
     if (savedTheme === "seagate") {
       setTheme("seagate");
       document.documentElement.setAttribute("data-theme", "seagate");
+    }
+
+    const savedEffects = localStorage.getItem("ui-effects");
+    if (savedEffects === "disabled") {
+      setEffects(false);
+      document.documentElement.setAttribute("data-effects", "false");
+    } else {
+      setEffects(true);
+      document.documentElement.setAttribute("data-effects", "true");
     }
   }, []);
 
@@ -66,6 +77,18 @@ export default function DashboardPage() {
       setTheme("default");
       localStorage.setItem("theme", "default");
       document.documentElement.removeAttribute("data-theme");
+    }
+  };
+
+  const toggleEffects = () => {
+    const newVal = !effects;
+    setEffects(newVal);
+    if (newVal) {
+      localStorage.setItem("ui-effects", "enabled");
+      document.documentElement.setAttribute("data-effects", "true");
+    } else {
+      localStorage.setItem("ui-effects", "disabled");
+      document.documentElement.setAttribute("data-effects", "false");
     }
   };
 
@@ -220,25 +243,36 @@ export default function DashboardPage() {
   const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   return (
-    <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
-      <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold text-gray-700">{t("dash_title")}</h1>
-          <p className="text-sm text-neu-blue font-medium mt-1">{t("dash_welcome")} {session?.user?.name}</p>
-        </div>
-        <div className="flex gap-4">
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
-            className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center font-bold text-sm"
-            title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
-          >
-            {language === 'th' ? 'TH' : 'EN'}
-          </button>
-          
-          <button
-            onClick={toggleTheme}
-            className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center"
+    <>
+      {effects && <AnimatedBackground />}
+      <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+        <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-gray-700">{t("dash_title")}</h1>
+            <p className="text-sm text-neu-blue font-medium mt-1">{t("dash_welcome")} {session?.user?.name}</p>
+          </div>
+          <div className="flex gap-4">
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
+              className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center font-bold text-sm"
+              title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
+            >
+              {language === 'th' ? 'TH' : 'EN'}
+            </button>
+
+            {/* Effects Toggle */}
+            <button
+              onClick={toggleEffects}
+              className={`w-12 h-12 neu-btn flex items-center justify-center ${effects ? 'text-neu-blue' : 'text-gray-400'}`}
+              title={effects ? (language === 'th' ? 'ปิดเอฟเฟกต์พื้นหลัง' : 'Disable background effects') : (language === 'th' ? 'เปิดเอฟเฟกต์พื้นหลัง' : 'Enable background effects')}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+            </button>
+            
+            <button
+              onClick={toggleTheme}
+              className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center"
             title={t("dash_theme")}
           >
             {theme === "default" ? (
@@ -546,5 +580,6 @@ export default function DashboardPage() {
       )}
 
     </div>
+    </>
   );
 }
