@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String
+  name             String
+  
+  // Shift Type: OFFICE, SHIFT_MORNING, SHIFT_NIGHT
+  shiftType        ShiftType 
+  
+  // Cycle Start Date for shift workers
+  cycleStartDate   DateTime? @db.Date 
+  
+  role             Role      @default(EMPLOYEE)
+  
+  timeLogs         TimeLog[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model TimeLog {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  
+  recordDate       DateTime  @db.Date
+  
+  clockInTime      DateTime
+  clockInLat       Float?
+  clockInLng       Float?
+  clockInFlagged   Boolean   @default(false)
+  
+  clockOutTime     DateTime? 
+  clockOutLat      Float?
+  clockOutLng      Float?
+  clockOutFlagged  Boolean   @default(false)
+  
+  createdAt        DateTime  @default(now())
+}
+
+model CompanySetting {
+  id               Int       @id @default(1)
+  companyLat       Float
+  companyLng       Float
+  allowedRadius    Int       @default(500)
+  updatedAt        DateTime  @updatedAt
+}
+
+enum ShiftType {
+  OFFICE
+  SHIFT_MORNING
+  SHIFT_NIGHT
+}
+
+enum Role {
+  EMPLOYEE
+  ADMIN
+}
