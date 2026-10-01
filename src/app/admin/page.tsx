@@ -706,6 +706,7 @@ export default function AdminDashboardPage() {
             </div>
           )}
         </div>
+      </div>
       )}
 
       {activeTab === "USERS" && (
