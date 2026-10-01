@@ -171,7 +171,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (status === "loading" || !settings || isLoading) {
+  if (status === "loading" || !settings) {
     return (
       <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
         <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center animate-pulse">
