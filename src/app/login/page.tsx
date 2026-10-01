@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    const savedPassword = localStorage.getItem("rememberedPassword");
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(atob(savedPassword));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +37,13 @@ export default function LoginPage() {
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
       setLoading(false);
     } else {
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+        localStorage.setItem("rememberedPassword", btoa(password));
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedPassword");
+      }
       router.push("/dashboard");
     }
   };
@@ -70,6 +88,20 @@ export default function LoginPage() {
               className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 placeholder-gray-400"
               placeholder="••••••••"
             />
+          </div>
+
+          <div className="flex items-center gap-3 px-2">
+            <div 
+              onClick={() => setRememberMe(!rememberMe)}
+              className={`w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-all ${rememberMe ? 'neu-pressed text-neu-blue' : 'neu-flat text-transparent'}`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <label onClick={() => setRememberMe(!rememberMe)} className="text-sm font-semibold text-gray-600 cursor-pointer select-none">
+              จำรหัสผ่านในเครื่องนี้
+            </label>
           </div>
 
           {error && (
