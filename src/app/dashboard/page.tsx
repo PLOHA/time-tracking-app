@@ -171,8 +171,29 @@ export default function DashboardPage() {
     }
   };
 
-  if (status === "loading" || !settings) {
-    return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">กำลังโหลด...</div>;
+  if (status === "loading" || !settings || isLoading) {
+    return (
+      <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+        <div className="max-w-md w-full neu-flat p-6 mb-8 flex justify-between items-center animate-pulse">
+          <div className="space-y-3">
+            <div className="h-6 w-32 bg-gray-200/60 rounded-md"></div>
+            <div className="h-4 w-24 bg-gray-200/60 rounded-md"></div>
+          </div>
+          <div className="flex gap-4">
+             <div className="w-12 h-12 bg-gray-200/60 rounded-xl"></div>
+             <div className="w-12 h-12 bg-gray-200/60 rounded-xl"></div>
+          </div>
+        </div>
+        <div className="max-w-md w-full flex gap-4 mb-8 animate-pulse">
+          <div className="flex-1 h-12 bg-gray-200/60 rounded-xl"></div>
+          <div className="flex-1 h-12 bg-gray-200/60 rounded-xl"></div>
+        </div>
+        <div className="max-w-md w-full neu-flat p-8 flex flex-col items-center animate-pulse">
+          <div className="w-40 h-40 rounded-full bg-gray-200/60 mb-8"></div>
+          <div className="w-full h-14 bg-gray-200/60 rounded-xl"></div>
+        </div>
+      </div>
+    );
   }
 
   // Determine State
@@ -444,7 +465,21 @@ export default function DashboardPage() {
              </h3>
              
              {isHistoryLoading ? (
-               <p className="text-center text-sm text-gray-500 py-4">กำลังโหลด...</p>
+               <div className="space-y-4 animate-pulse">
+                  <div className="flex justify-between items-center border-b border-gray-100 pb-4 mt-2">
+                    <div className="h-4 w-20 bg-gray-200/60 rounded"></div>
+                    <div className="flex flex-col items-end gap-2">
+                       <div className="h-6 w-24 bg-gray-200/60 rounded"></div>
+                       <div className="h-3 w-16 bg-gray-200/60 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <div className="h-4 w-20 bg-gray-200/60 rounded"></div>
+                    <div className="flex flex-col items-end gap-2">
+                       <div className="h-6 w-24 bg-gray-200/60 rounded"></div>
+                    </div>
+                  </div>
+               </div>
              ) : selectedLog ? (
                <div className="space-y-4">
                   <div className="flex justify-between items-center border-b border-gray-200 pb-2">

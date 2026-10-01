@@ -271,7 +271,17 @@ export default function AdminDashboardPage() {
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   if (status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">กำลังโหลดข้อมูล...</div>;
+    return (
+      <div className="min-h-screen p-4 md:p-8 flex flex-col items-center animate-pulse">
+        <div className="max-w-6xl w-full neu-flat p-6 mb-8 flex justify-between items-center">
+          <div className="space-y-2">
+             <div className="h-6 w-48 bg-gray-200/60 rounded"></div>
+             <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
+          </div>
+          <div className="w-12 h-12 bg-gray-200/60 rounded-xl"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -387,7 +397,18 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           {loading ? (
-             <p className="text-center py-8 text-gray-500">กำลังโหลด...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="neu-pressed rounded-2xl p-6 flex flex-col h-[200px]">
+                  <div className="h-6 w-3/4 bg-gray-200/60 rounded mb-2"></div>
+                  <div className="h-4 w-1/2 bg-gray-200/60 rounded mb-6"></div>
+                  <div className="grid grid-cols-2 gap-4 mt-auto">
+                    <div className="h-20 bg-gray-200/60 rounded-xl"></div>
+                    <div className="h-20 bg-gray-200/60 rounded-xl"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredLogs.length === 0 ? (
@@ -485,7 +506,13 @@ export default function AdminDashboardPage() {
                       ))}
                       
                       {isCalLoading ? (
-                        <div className="col-span-7 py-8 text-sm text-gray-500">กำลังโหลด...</div>
+                        <>
+                          {Array.from({ length: 35 }).map((_, i) => (
+                            <div key={`skel-${i}`} className="flex justify-center items-center">
+                              <div className="w-10 h-10 rounded-xl bg-gray-200/60 animate-pulse"></div>
+                            </div>
+                          ))}
+                        </>
                       ) : (
                         calendarGrid.map((day, idx) => {
                           if (!day) return <div key={`empty-${idx}`} />;
@@ -616,7 +643,18 @@ export default function AdminDashboardPage() {
           <div className="neu-flat p-8 lg:col-span-2">
             <h2 className="text-lg font-bold text-gray-700 mb-6">รายชื่อพนักงานทั้งหมด</h2>
             {loading ? (
-               <p className="text-center py-8 text-gray-500">กำลังโหลด...</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="neu-pressed rounded-2xl p-6 flex flex-col h-[200px]">
+                    <div className="h-6 w-1/2 bg-gray-200/60 rounded mb-2"></div>
+                    <div className="h-4 w-2/3 bg-gray-200/60 rounded mb-6"></div>
+                    <div className="grid grid-cols-2 gap-4 mt-auto">
+                      <div className="h-16 bg-gray-200/60 rounded-xl"></div>
+                      <div className="h-16 bg-gray-200/60 rounded-xl"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {users.map((u) => (
@@ -656,7 +694,21 @@ export default function AdminDashboardPage() {
         <div className="max-w-2xl w-full neu-flat p-8">
           <h2 className="text-lg font-bold text-gray-700 mb-6">ตั้งค่าพิกัดบริษัท (GPS)</h2>
           {loading ? (
-             <p className="text-center py-8 text-gray-500">กำลังโหลด...</p>
+             <div className="space-y-6 animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
+                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
+                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
+                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
+                </div>
+                <div className="h-14 w-full bg-gray-200/60 rounded-xl mt-4"></div>
+             </div>
           ) : (
              <form onSubmit={handleUpdateSettings} className="space-y-6">
                 <div>
