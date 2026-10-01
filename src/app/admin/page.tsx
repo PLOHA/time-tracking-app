@@ -79,6 +79,45 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const exportToCSV = () => {
+    if (logs.length === 0) {
+      alert("ไม่มีข้อมูลสำหรับส่งออก");
+      return;
+    }
+    
+    const headers = ["วันที่", "ชื่อพนักงาน", "กะทำงาน", "เวลาเข้า", "สถานะเข้า", "ระยะห่างตอนเข้า (เมตร)", "เวลาออก", "สถานะออก", "สาย (นาที)"];
+    
+    const rows = logs.map(log => {
+       const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
+       const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('th-TH') : '-';
+       const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('th-TH') : '-';
+       const inStatus = log.clockInFlagged ? "นอกเขต" : "ในเขต";
+       const outStatus = log.clockOutTime ? (log.clockOutFlagged ? "นอกเขต" : "ในเขต") : "-";
+       
+       return [
+         dateStr, 
+         log.user.name, 
+         log.user.shiftType,
+         inTime,
+         inStatus,
+         log.clockInDistance || 0,
+         outTime,
+         outStatus,
+         log.lateMinutes || 0
+       ].map(v => `"${v}"`).join(",");
+    });
+    
+    // \uFEFF is the Byte Order Mark (BOM) needed for Excel to read UTF-8 Thai characters correctly
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `timelogs_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -185,7 +224,16 @@ export default function AdminDashboardPage() {
       {/* Main Content Area */}
       {activeTab === "LOGS" && (
         <div className="max-w-6xl w-full neu-flat p-8">
-          <h2 className="text-lg font-bold text-gray-700 mb-6">บันทึกการลงเวลาของวันนี้</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-700">บันทึกการลงเวลาของวันนี้</h2>
+            <button 
+              onClick={exportToCSV}
+              className="neu-btn px-4 py-2 font-bold text-neu-blue flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              Export Excel (CSV)
+            </button>
+          </div>
           {loading ? (
              <p className="text-center py-8 text-gray-500">กำลังโหลด...</p>
           ) : (
