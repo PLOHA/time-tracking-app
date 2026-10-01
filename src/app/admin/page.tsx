@@ -736,7 +736,7 @@ export default function AdminDashboardPage() {
                            
                            <div className="mt-2 pt-4 border-t border-gray-100 flex justify-between items-center">
                               <span className="text-xs font-bold text-gray-500">
-                                รูปรอยห่างเข้างาน: {log.distanceIn !== null ? `${log.distanceIn} ม.` : '-'}
+                                ห่างจากออฟฟิศ: {log.distanceIn !== null ? `${log.distanceIn} ม.` : '-'}
                               </span>
                               {log.lateness?.isLate && (
                                 <span className="text-xs font-bold text-neu-red bg-red-100 px-2 py-1 rounded-md">
