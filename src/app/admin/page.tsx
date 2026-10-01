@@ -333,15 +333,15 @@ export default function AdminDashboardPage() {
 
   const barDataMap: Record<number, any> = {};
   for (let i = 1; i <= daysInMonth; i++) {
-    barDataMap[i] = { date: `${i}`, ปกติ: 0, สาย: 0, นอกพื้นที่: 0 };
+    barDataMap[i] = { date: `${i}`, [t("admin_normal")]: 0, [t("admin_late")]: 0, [t("dash_out_bounds")]: 0 };
   }
 
   filteredMonthlyLogs.forEach(log => {
     const d = new Date(log.recordDate).getDate();
     if (barDataMap[d]) {
-      if (log.clockInFlagged || log.clockOutFlagged) barDataMap[d].นอกพื้นที่++;
-      else if (log.lateness?.isLate) barDataMap[d].สาย++;
-      else barDataMap[d].ปกติ++;
+      if (log.clockInFlagged || log.clockOutFlagged) barDataMap[d][t("dash_out_bounds")]++;
+      else if (log.lateness?.isLate) barDataMap[d][t("admin_late")]++;
+      else barDataMap[d][t("admin_normal")]++;
     }
   });
   const barData = Object.values(barDataMap);
@@ -499,7 +499,7 @@ export default function AdminDashboardPage() {
                          <Legend verticalAlign="top" height={36}/>
                          <Bar dataKey={t("admin_normal")} stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
                          <Bar dataKey={t("admin_late")} stackId="a" fill="#F59E0B" />
-                         <Bar dataKey="นอกพื้นที่" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                         <Bar dataKey={t("dash_out_bounds")} stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
                        </BarChart>
                      </ResponsiveContainer>
                    )}
