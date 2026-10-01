@@ -73,10 +73,10 @@ export async function getAdminLogs(dateStr?: string) {
     
     if (time.getTime() > expectedTime.getTime()) {
       const diffMins = Math.floor((time.getTime() - expectedTime.getTime()) / 60000);
-      return { isLate: true, minutesLate: diffMins, text: `สาย ${diffMins} นาที` };
+      return { isLate: diffMins > 0, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `สาย ${diffMins} นาที` };
     } else {
       const diffMins = Math.floor((expectedTime.getTime() - time.getTime()) / 60000);
-      return { isLate: false, minutesLate: diffMins, text: `เข้าก่อน ${diffMins} นาที` };
+      return { isLate: false, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `เข้าก่อน ${diffMins} นาที` };
     }
   }
 

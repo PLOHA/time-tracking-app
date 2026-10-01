@@ -615,7 +615,7 @@ export default function AdminDashboardPage() {
                           </span>
                           {log.lateness && (
                             <span className={`text-xs font-bold ${log.lateness.isLate ? 'text-neu-red' : 'text-neu-green'}`}>
-                              {language === "th" ? log.lateness.text : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`)}
+                              {language === "th" ? log.lateness.text : (log.lateness.minutesLate === 0 ? "On time" : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`))}
                             </span>
                           )}
                         </div>
@@ -751,7 +751,7 @@ export default function AdminDashboardPage() {
                               </span>
                               {log.lateness?.isLate && (
                                 <span className="text-xs font-bold text-neu-red bg-red-100 px-2 py-1 rounded-md">
-                                  {language === "th" ? log.lateness.text : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`)}
+                                  {language === "th" ? log.lateness.text : (log.lateness.minutesLate === 0 ? "On time" : (log.lateness.isLate ? `Late ${log.lateness.minutesLate} min` : `Early ${log.lateness.minutesLate} min`))}
                                 </span>
                               )}
                            </div>

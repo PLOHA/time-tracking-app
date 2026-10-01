@@ -16,11 +16,11 @@ export function calculateLateness(clockInTime: Date | string | null, shiftType: 
   if (time.getTime() > expectedTime.getTime()) {
     const diffMs = time.getTime() - expectedTime.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    return { isLate: true, minutesLate: diffMins, text: `สาย ${diffMins} นาที` };
+    return { isLate: diffMins > 0, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `สาย ${diffMins} นาที` };
   } else {
     const diffMs = expectedTime.getTime() - time.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    return { isLate: false, minutesLate: diffMins, text: `เข้าก่อน ${diffMins} นาที` };
+    return { isLate: false, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `เข้าก่อน ${diffMins} นาที` };
   }
 }
 
