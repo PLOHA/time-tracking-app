@@ -886,7 +886,9 @@ export default function AdminDashboardPage() {
                     </div>
                     
                     <div className="grid grid-cols-7 gap-y-4 text-center">
-                      {language === 'th' ? ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                      {language === 'th' ? ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'].map(d => (
+                        <div key={d} className="text-xs font-bold text-gray-400">{d}</div>
+                      )) : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
                         <div key={d} className="text-xs font-bold text-gray-400">{d}</div>
                       ))}
                       
