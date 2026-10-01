@@ -26,6 +26,14 @@ export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showExportMenu, setShowExportMenu] = useState(false);
 
+  // Modal State for User Calendar
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [userMonthlyLogs, setUserMonthlyLogs] = useState<any[]>([]);
+  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [calSelectedDate, setCalSelectedDate] = useState<Date | null>(null);
+  const [isCalLoading, setIsCalLoading] = useState(false);
+
   // Form State - Users
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formMsg, setFormMsg] = useState({ text: "", isError: false });
@@ -146,6 +154,46 @@ export default function AdminDashboardPage() {
     setShowExportMenu(false);
   };
 
+  const openUserCalendar = async (user: any) => {
+    setSelectedUser(user);
+    const d = new Date(targetDate);
+    setCalMonth(d.getMonth() + 1);
+    setCalYear(d.getFullYear());
+    setCalSelectedDate(d);
+    await fetchUserCalendar(user.id, d.getFullYear(), d.getMonth() + 1);
+  };
+
+  const fetchUserCalendar = async (userId: string, year: number, month: number) => {
+    setIsCalLoading(true);
+    try {
+      const data = await getAdminMonthlyLogs(year, month, userId);
+      setUserMonthlyLogs(data);
+    } catch (e) {
+      console.error(e);
+    }
+    setIsCalLoading(false);
+  };
+
+  const handlePrevCalMonth = async () => {
+    if (!selectedUser) return;
+    let m = calMonth - 1;
+    let y = calYear;
+    if (m < 1) { m = 12; y -= 1; }
+    setCalMonth(m);
+    setCalYear(y);
+    await fetchUserCalendar(selectedUser.id, y, m);
+  };
+
+  const handleNextCalMonth = async () => {
+    if (!selectedUser) return;
+    let m = calMonth + 1;
+    let y = calYear;
+    if (m > 12) { m = 1; y += 1; }
+    setCalMonth(m);
+    setCalYear(y);
+    await fetchUserCalendar(selectedUser.id, y, m);
+  };
+
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -203,6 +251,24 @@ export default function AdminDashboardPage() {
     if (searchQuery && !log.user.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+
+  // Calendar Helpers
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const firstDayOfMonth = new Date(calYear, calMonth - 1, 1).getDay();
+  const calendarGrid = [];
+  for (let i = 0; i < firstDayOfMonth; i++) calendarGrid.push(null);
+  for (let i = 1; i <= daysInMonth; i++) calendarGrid.push(i);
+
+  const getLogForDay = (day: number) => {
+    return userMonthlyLogs.find(log => new Date(log.recordDate).getDate() === day);
+  };
+  
+  const getSelectedDayDetails = () => {
+    if (!calSelectedDate) return null;
+    return getLogForDay(calSelectedDate.getDate());
+  };
+
+  const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   if (status === "loading") {
     return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">กำลังโหลดข้อมูล...</div>;
@@ -330,7 +396,11 @@ export default function AdminDashboardPage() {
                 filteredLogs.map((log) => {
                   const hasRedFlag = log.clockInFlagged || log.clockOutFlagged;
                   return (
-                    <div key={log.id} className="neu-pressed rounded-2xl p-6 flex flex-col relative">
+                    <div 
+                      key={log.id} 
+                      onClick={() => openUserCalendar(log.user)}
+                      className="neu-pressed rounded-2xl p-6 flex flex-col relative cursor-pointer hover:opacity-80 transition-opacity"
+                    >
                       
                       {/* Status Badge */}
                       <div className="absolute top-4 right-4">
@@ -380,6 +450,115 @@ export default function AdminDashboardPage() {
                   );
                 })
               )}
+            </div>
+          )}
+
+          {/* User Calendar Modal */}
+          {selectedUser && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-neu-bg max-w-md w-full rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-neu-bg">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-700">{selectedUser.name}</h3>
+                    <p className="text-sm text-gray-500">ประวัติการลงเวลาส่วนตัว</p>
+                  </div>
+                  <button onClick={() => setSelectedUser(null)} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+
+                <div className="p-6 overflow-y-auto">
+                  <div className="neu-flat rounded-3xl p-6 mb-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <button onClick={handlePrevCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                      </button>
+                      <h2 className="text-xl font-bold text-gray-700">{thaiMonths[calMonth - 1]} {calYear}</h2>
+                      <button onClick={handleNextCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-7 gap-y-4 text-center">
+                      {['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'].map(d => (
+                        <div key={d} className="text-xs font-bold text-gray-400">{d}</div>
+                      ))}
+                      
+                      {isCalLoading ? (
+                        <div className="col-span-7 py-8 text-sm text-gray-500">กำลังโหลด...</div>
+                      ) : (
+                        calendarGrid.map((day, idx) => {
+                          if (!day) return <div key={`empty-${idx}`} />;
+                          
+                          const d = new Date(calYear, calMonth - 1, day);
+                          const isSelected = calSelectedDate && d.getTime() === calSelectedDate.getTime();
+                          const log = getLogForDay(day);
+                          const hasRedFlag = log && (log.clockInFlagged || log.clockOutFlagged);
+                          
+                          return (
+                            <div key={`day-${day}`} className="flex justify-center items-center">
+                              <button 
+                                onClick={() => setCalSelectedDate(d)}
+                                className={`relative w-10 h-10 flex justify-center items-center rounded-xl font-bold transition-all ${
+                                  isSelected ? "neu-pressed text-neu-blue" : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                              >
+                                {day}
+                                {log && (
+                                  <span className={`absolute bottom-1 w-1 h-1 rounded-full ${hasRedFlag ? 'bg-neu-red' : 'bg-neu-green'}`} />
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Day Details */}
+                  <div className="neu-flat rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">รายละเอียด</h3>
+                    {!calSelectedDate ? (
+                       <p className="text-sm text-gray-500 text-center py-4">โปรดเลือกวันที่บนปฏิทิน</p>
+                    ) : (() => {
+                       const log = getSelectedDayDetails();
+                       if (!log) return <p className="text-sm text-gray-500 text-center py-4">ไม่มีบันทึกการลงเวลาในวันนี้</p>;
+                       return (
+                         <div className="flex flex-col gap-4">
+                           <div className="flex justify-between items-center">
+                             <div className="flex flex-col">
+                               <span className="text-xs text-gray-500 font-semibold mb-1">เข้างาน</span>
+                               <span className={`text-lg font-bold ${log.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
+                                 {formatTime(log.clockInTime)}
+                               </span>
+                               {log.clockInFlagged && <span className="text-[10px] text-neu-red font-bold">นอกสถานที่</span>}
+                             </div>
+                             <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
+                             <div className="flex flex-col items-end">
+                               <span className="text-xs text-gray-500 font-semibold mb-1">ออกงาน</span>
+                               <span className={`text-lg font-bold ${log.clockOutTime ? (log.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
+                                 {formatTime(log.clockOutTime)}
+                               </span>
+                               {log.clockOutFlagged && <span className="text-[10px] text-neu-red font-bold">นอกสถานที่</span>}
+                             </div>
+                           </div>
+                           
+                           <div className="mt-2 pt-4 border-t border-gray-100 flex justify-between items-center">
+                              <span className="text-xs font-bold text-gray-500">
+                                รูปรอยห่างเข้างาน: {log.distanceIn !== null ? `${log.distanceIn} ม.` : '-'}
+                              </span>
+                              {log.lateness?.isLate && (
+                                <span className="text-xs font-bold text-neu-red bg-red-100 px-2 py-1 rounded-md">
+                                  {log.lateness.text}
+                                </span>
+                              )}
+                           </div>
+                         </div>
+                       );
+                    })()}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

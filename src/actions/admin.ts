@@ -32,6 +32,7 @@ export async function getAdminLogs(dateStr?: string) {
     include: {
       user: {
         select: {
+          id: true,
           name: true,
           email: true,
           shiftType: true,
@@ -102,7 +103,7 @@ export async function getAdminLogs(dateStr?: string) {
   return enrichedLogs;
 }
 
-export async function getAdminMonthlyLogs(year: number, month: number) {
+export async function getAdminMonthlyLogs(year: number, month: number, targetUserId?: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Unauthorized");
 
@@ -117,16 +118,23 @@ export async function getAdminMonthlyLogs(year: number, month: number) {
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
+  const whereClause: any = {
+    recordDate: {
+      gte: startDate,
+      lte: endDate
+    }
+  };
+
+  if (targetUserId) {
+    whereClause.userId = targetUserId;
+  }
+
   const logs = await prisma.timeLog.findMany({
-    where: {
-      recordDate: {
-        gte: startDate,
-        lte: endDate
-      }
-    },
+    where: whereClause,
     include: {
       user: {
         select: {
+          id: true,
           name: true,
           email: true,
           shiftType: true,
