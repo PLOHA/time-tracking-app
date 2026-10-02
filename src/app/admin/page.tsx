@@ -288,7 +288,7 @@ export default function AdminDashboardPage() {
       const res = await createUser({
         ...formData,
         cycleStartDate: formData.shiftType !== "OFFICE" ? formData.cycleStartDate : null,
-          ...(formData.branchId ? { branchId: formData.branchId } : {}) as any
+          
       });
 
       if (res.success) {
@@ -806,13 +806,6 @@ export default function AdminDashboardPage() {
                 )}
 
                 
-                <div className="mt-4">
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">สาขา (Branch)</label>
-                  <select className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 appearance-none" value={formData.branchId} onChange={e => setFormData({...formData, branchId: e.target.value})}>
-                    <option value="">-- ไม่ระบุ (ใช้สำนักงานใหญ่) --</option>
-                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
-                </div>
 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
                   {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_add_user")}
                 </button>
@@ -979,15 +972,8 @@ export default function AdminDashboardPage() {
                 }
               }} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">ชื่อ-นามสกุล (Name)</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">Name</label>
                   <input type="text" required value={editFormData.name} onChange={e => setEditFormData({...editFormData, name: e.target.value})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">สาขา (Branch)</label>
-                  <select className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 appearance-none" value={editFormData.branchId} onChange={e => setEditFormData({...editFormData, branchId: e.target.value})}>
-                    <option value="">-- ไม่ระบุ (ใช้สำนักงานใหญ่) --</option>
-                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">รูปแบบเวลาเข้างาน (Shift)</label>
