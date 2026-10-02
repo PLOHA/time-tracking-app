@@ -39,7 +39,7 @@ export async function getAdminLogs(dateStr?: string) {
             email: true,
             shiftType: true,
             branch: {
-              select: { timezone: true }
+              select: { timezone: true, lat: true, lng: true }
             }
           }
       }
@@ -88,12 +88,12 @@ export async function getAdminLogs(dateStr?: string) {
   const enrichedLogs = logs.map(log => {
     let distanceIn = null;
     let distanceOut = null;
-    if (settings && log.clockInLat && log.clockInLng) {
-      distanceIn = calcDistance(log.clockInLat, log.clockInLng, settings.companyLat, settings.companyLng);
-    }
-    if (settings && log.clockOutLat && log.clockOutLng) {
-      distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
-    }
+    if (log.clockInLat && log.clockInLng && log.user.branch) {
+        distanceIn = calcDistance(log.clockInLat, log.clockInLng, log.user.branch.lat, log.user.branch.lng);
+      }
+    if (log.clockOutLat && log.clockOutLng && log.user.branch) {
+        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, log.user.branch.lat, log.user.branch.lng);
+      }
     
     const lateness = calcLate(log.clockInTime, log.user.shiftType);
 
@@ -144,7 +144,7 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
             email: true,
             shiftType: true,
             branch: {
-              select: { timezone: true }
+              select: { timezone: true, lat: true, lng: true }
             }
           }
       }
@@ -172,12 +172,12 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
   return logs.map(log => {
     let distanceIn = null;
     let distanceOut = null;
-    if (settings && log.clockInLat && log.clockInLng) {
-      distanceIn = calcDistance(log.clockInLat, log.clockInLng, settings.companyLat, settings.companyLng);
-    }
-    if (settings && log.clockOutLat && log.clockOutLng) {
-      distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
-    }
+    if (log.clockInLat && log.clockInLng && log.user.branch) {
+        distanceIn = calcDistance(log.clockInLat, log.clockInLng, log.user.branch.lat, log.user.branch.lng);
+      }
+    if (log.clockOutLat && log.clockOutLng && log.user.branch) {
+        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, log.user.branch.lat, log.user.branch.lng);
+      }
     
     const tz = log.user.branch?.timezone || "Asia/Bangkok";
       const { isLate, minutesLate, text } = calculateLateness(log.clockInTime, log.user.shiftType, tz);
