@@ -417,7 +417,7 @@ export default function DashboardPage() {
                     {todayLog.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                   </span>
                   <span className={`font-bold text-lg ${todayLog.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
-                    {new Date(todayLog.clockInTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(todayLog.clockInTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 {(() => {
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                     </span>
                   )}
                   <span className={`font-bold text-lg ${todayLog.clockOutTime ? (todayLog.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
-                    {todayLog.clockOutTime ? new Date(todayLog.clockOutTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : "-"}
+                    {todayLog.clockOutTime ? new Date(todayLog.clockOutTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' }) : "-"}
                   </span>
                 </div>
                 {todayLog.clockOutTime && (
@@ -546,7 +546,7 @@ export default function DashboardPage() {
                           {selectedLog.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds")}
                         </span>
                         <span className={`font-bold text-lg ${selectedLog.clockInFlagged ? 'text-neu-red' : 'text-gray-700'}`}>
-                          {new Date(selectedLog.clockInTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(selectedLog.clockInTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       {(() => {
@@ -570,7 +570,7 @@ export default function DashboardPage() {
                           </span>
                         )}
                         <span className={`font-bold text-lg ${selectedLog.clockOutTime ? (selectedLog.clockOutFlagged ? 'text-neu-red' : 'text-gray-700') : 'text-gray-400'}`}>
-                          {selectedLog.clockOutTime ? new Date(selectedLog.clockOutTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : "-"}
+                          {selectedLog.clockOutTime ? new Date(selectedLog.clockOutTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' }) : "-"}
                         </span>
                       </div>
                     </div>

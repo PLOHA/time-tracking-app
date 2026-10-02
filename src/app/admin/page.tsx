@@ -168,8 +168,8 @@ export default function AdminDashboardPage() {
     
     const rows = exportLogs.map(log => {
        const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
-       const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('th-TH') : '-';
-       const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('th-TH') : '-';
+       const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false }) : '-';
+       const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false }) : '-';
        const inStatus = log.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds");
        const outStatus = log.clockOutTime ? (log.clockOutFlagged ? t("dash_out_bounds") : t("dash_in_bounds")) : "-";
        
@@ -270,7 +270,7 @@ export default function AdminDashboardPage() {
   const formatTime = (dateObj: Date | null | string) => {
     if (!dateObj) return "-";
     const d = new Date(dateObj);
-    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' });
   };
   
   const formatDate = (dateObj: Date | null | string) => {
