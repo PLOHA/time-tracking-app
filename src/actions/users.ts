@@ -18,8 +18,6 @@ export async function getUsers() {
       shiftType: true,
       cycleStartDate: true,
       role: true,
-      branchId: true,
-      branch: { select: { name: true, timezone: true } }
     }
   });
 
@@ -32,18 +30,16 @@ export async function createUser(data: {
   passwordRaw: string;
   shiftType: "OFFICE" | "SHIFT_MORNING" | "SHIFT_NIGHT";
   cycleStartDate: string | null;
-  branchId?: string | null;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Unauthorized");
 
-  // Validate if email exists
   const existing = await prisma.user.findUnique({
     where: { email: data.email },
   });
 
   if (existing) {
-    return { success: false, message: "อีเมลนี้มีในระบบแล้ว" };
+    return { success: false, message: "Email already exists" };
   }
 
   const passwordHash = await bcrypt.hash(data.passwordRaw, 10);
@@ -60,16 +56,18 @@ export async function createUser(data: {
       passwordHash: passwordHash,
       shiftType: data.shiftType,
       cycleStartDate: parsedDate,
-      branchId: data.branchId || null,
     },
   });
 
-  return { success: true, message: "เพิ่มพนักงานสำเร็จ" };
+  return { success: true, message: "Success" };
 }
 
 export async function updateUser(id: string, data: any) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
+  
+  if (data.branchId) delete data.branchId;
+
   await prisma.user.update({ where: { id }, data });
   return { success: true };
 }

@@ -37,10 +37,7 @@ export async function getAdminLogs(dateStr?: string) {
             id: true,
             name: true,
             email: true,
-            shiftType: true,
-            branch: {
-              select: { name: true, timezone: true, lat: true, lng: true }
-            }
+            shiftType: true
           }
       }
     },
@@ -88,11 +85,11 @@ export async function getAdminLogs(dateStr?: string) {
   const enrichedLogs = logs.map(log => {
     let distanceIn = null;
     let distanceOut = null;
-    if (log.clockInLat && log.clockInLng && log.user.branch) {
-        distanceIn = calcDistance(log.clockInLat, log.clockInLng, log.user.branch.lat, log.user.branch.lng);
+    if (log.clockInLat && log.clockInLng && settings) {
+        distanceIn = calcDistance(log.clockInLat, log.clockInLng, settings.companyLat, settings.companyLng);
       }
-    if (log.clockOutLat && log.clockOutLng && log.user.branch) {
-        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, log.user.branch.lat, log.user.branch.lng);
+    if (log.clockOutLat && log.clockOutLng && settings) {
+        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
       }
     
     const lateness = calcLate(log.clockInTime, log.user.shiftType);
@@ -142,10 +139,7 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
             id: true,
             name: true,
             email: true,
-            shiftType: true,
-            branch: {
-              select: { name: true, timezone: true, lat: true, lng: true }
-            }
+            shiftType: true
           }
       }
     },
@@ -172,14 +166,14 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
   return logs.map(log => {
     let distanceIn = null;
     let distanceOut = null;
-    if (log.clockInLat && log.clockInLng && log.user.branch) {
-        distanceIn = calcDistance(log.clockInLat, log.clockInLng, log.user.branch.lat, log.user.branch.lng);
+    if (log.clockInLat && log.clockInLng && settings) {
+        distanceIn = calcDistance(log.clockInLat, log.clockInLng, settings.companyLat, settings.companyLng);
       }
-    if (log.clockOutLat && log.clockOutLng && log.user.branch) {
-        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, log.user.branch.lat, log.user.branch.lng);
+    if (log.clockOutLat && log.clockOutLng && settings) {
+        distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
       }
     
-    const tz = log.user.branch?.timezone || "Asia/Bangkok";
+    const tz = "Asia/Singapore";
       const { isLate, minutesLate, text } = calculateLateness(log.clockInTime, log.user.shiftType, tz);
 
       return {
@@ -221,20 +215,3 @@ export async function updateCompanySettings(data: { lat: number, lng: number, ra
   return { success: true, message: "อัปเดตการตั้งค่าสำเร็จ" };
 }
 
-export async function getAdminBranches() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') return [];
-  return await prisma.branch.findMany({ orderBy: { createdAt: 'desc' } });
-}
-
-export async function createAdminBranch(data: { name: string, timezone: string, lat: number, lng: number, allowedRadius: number }) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
-  return await prisma.branch.create({ data });
-}
-
-export async function updateAdminBranch(id: string, data: { name: string, timezone: string, lat: number, lng: number, allowedRadius: number }) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
-  return await prisma.branch.update({ where: { id }, data });
-}

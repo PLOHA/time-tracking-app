@@ -6,26 +6,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function getCompanySettings() {
   const settings = await prisma.companySetting.findFirst();
-  const session = await getServerSession(authOptions);
-  
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { branch: true }
-    });
-    
-    if (user?.branch) {
-      return {
-        id: settings?.id || 1,
-        companyLat: user.branch.lat,
-        companyLng: user.branch.lng,
-        allowedRadius: user.branch.allowedRadius,
-        branchName: user.branch.name,
-        updatedAt: user.branch.updatedAt,
-      };
-    }
-  }
-
   return settings;
 }
 
@@ -40,12 +20,12 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    include: { branch: true }
+    
   });
 
   if (!user) throw new Error("User not found");
 
-  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const timezone = "Asia/Singapore";
   const bkkTime = getLocalTime(timezone);
   const today = getLocalTodayMidnightUTC(timezone);
 
@@ -56,16 +36,16 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
     // Office: Mon-Fri
     const dayOfWeek = bkkTime.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
     if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return { success: false, message: "ไม่อนุญาตให้ลงเวลา วันนี้เป็นวันหยุดของคุณ (ส.-อา.)" };
+      return { success: false, message: "?????????????????? ??????????????????????? (?.-??.)" };
     }
     // Office check-in window (allow 06:00 to 17:00)
     if (currentHour < 6 || currentHour >= 17) {
-      return { success: false, message: "อยู่นอกช่วงเวลาอนุญาตให้เข้างานสำหรับพนักงานออฟฟิศ (08.00-17.00)" };
+      return { success: false, message: "?????????????????????????????????????????????????? (08.00-17.00)" };
     }
   } else {
     // Shift workers (4 work, 2 off)
     if (!user.cycleStartDate) {
-      return { success: false, message: "ยังไม่ได้ตั้งค่าวันเริ่มรอบกะการทำงาน (Cycle Start Date) กรุณาติดต่อ HR" };
+      return { success: false, message: "????????????????????????????????????? (Cycle Start Date) ??????????? HR" };
     }
 
     const start = new Date(user.cycleStartDate);
@@ -80,19 +60,19 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
     
     if (cycleDay >= 4) {
       // 4 and 5 are off days
-      return { success: false, message: "ไม่อนุญาตให้ลงเวลา วันนี้เป็นรอบวันหยุดของคุณ (2 วันหยุด)" };
+      return { success: false, message: "?????????????????? ?????????????????????????? (2 ???????)" };
     }
 
     if (user.shiftType === "SHIFT_MORNING") {
       // Morning shift: 06:00 - 18:00
       if (currentHour < 4 || currentHour >= 18) {
-        return { success: false, message: "อยู่นอกช่วงเวลาอนุญาตให้เข้างานสำหรับกะเช้า (06.00-18.00)" };
+        return { success: false, message: "??????????????????????????????????????????? (06.00-18.00)" };
       }
     } else if (user.shiftType === "SHIFT_NIGHT") {
       // Night shift: 18:00 - 06:00
       // Allow clock in from 16:00 to 06:00 the next day
       if (currentHour >= 6 && currentHour < 16) {
-        return { success: false, message: "อยู่นอกช่วงเวลาอนุญาตให้เข้างานสำหรับกะดึก (18.00-06.00)" };
+        return { success: false, message: "?????????????????????????????????????????? (18.00-06.00)" };
       }
     }
   }
@@ -110,7 +90,7 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
   });
 
   if (existingLog && !existingLog.clockOutTime) {
-    return { success: false, message: "คุณได้ลงเวลาเข้างานไปแล้ว และยังไม่ได้ลงเวลาออก" };
+    return { success: false, message: "????????????????????????? ?????????????????????" };
   }
 
   const isFlagged = distance > allowedRadius;
@@ -130,7 +110,7 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
     },
   });
 
-  return { success: true, message: "ลงเวลาเข้างานสำเร็จ", flagged: isFlagged };
+  return { success: true, message: "???????????????????", flagged: isFlagged };
 }
 
 export async function getTodayLog() {
@@ -139,12 +119,12 @@ export async function getTodayLog() {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    include: { branch: true }
+    
   });
 
   if (!user) return null;
 
-  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const timezone = "Asia/Singapore";
   const today = getLocalTodayMidnightUTC(timezone);
 
   const log = await prisma.timeLog.findFirst({
@@ -166,11 +146,11 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    include: { branch: true }
+    
   });
   if (!user) throw new Error("User not found");
 
-  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const timezone = "Asia/Singapore";
   const today = getLocalTodayMidnightUTC(timezone);
 
   const existingLog = await prisma.timeLog.findFirst({
@@ -181,11 +161,11 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
   });
 
   if (!existingLog) {
-    return { success: false, message: "ไม่พบข้อมูลการลงเวลาเข้างานในวันนี้" };
+    return { success: false, message: "???????????????????????????????????" };
   }
 
   if (existingLog.clockOutTime) {
-    return { success: false, message: "คุณได้ลงเวลาออกงานไปแล้ว" };
+    return { success: false, message: "????????????????????????" };
   }
 
   const isFlagged = distance > allowedRadius;
@@ -204,7 +184,7 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
     },
   });
 
-  return { success: true, message: "ลงเวลาออกงานสำเร็จ", flagged: isFlagged };
+  return { success: true, message: "??????????????????", flagged: isFlagged };
 }
 
 export async function clearMyLogs() {
