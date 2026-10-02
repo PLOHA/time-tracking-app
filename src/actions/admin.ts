@@ -6,12 +6,11 @@ import { calculateLateness } from "@/lib/time-utils";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getLocalTodayMidnightUTC } from "@/lib/timezone";
 
-export async function getAdminLogs(dateStr?: string) {
+export async function getAdminLogs(dateStr?: string, timeRange: "DAY" | "MONTH" | "YEAR" = "DAY") {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.email) throw new Error("Unauthorized");
 
-  // In a real app we'd check if user.role === 'ADMIN'
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
@@ -20,17 +19,27 @@ export async function getAdminLogs(dateStr?: string) {
     throw new Error("Forbidden"); 
   }
 
-  // Target date (default to today)
   let targetDate = getLocalTodayMidnightUTC();
   if (dateStr) {
     targetDate = new Date(dateStr);
     targetDate.setHours(0, 0, 0, 0);
   }
 
+  let whereClause: any = {};
+  if (timeRange === "DAY") {
+    whereClause.recordDate = targetDate;
+  } else if (timeRange === "MONTH") {
+    const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+    const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    whereClause.recordDate = { gte: startOfMonth, lte: endOfMonth };
+  } else if (timeRange === "YEAR") {
+    const startOfYear = new Date(targetDate.getFullYear(), 0, 1);
+    const endOfYear = new Date(targetDate.getFullYear(), 11, 31, 23, 59, 59, 999);
+    whereClause.recordDate = { gte: startOfYear, lte: endOfYear };
+  }
+
   const logs = await prisma.timeLog.findMany({
-    where: {
-      recordDate: targetDate,
-    },
+    where: whereClause,
     include: {
       user: {
         select: {

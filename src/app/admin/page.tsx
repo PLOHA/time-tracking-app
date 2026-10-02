@@ -27,6 +27,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   // Filters State for Logs
+  const [timeRange, setTimeRange] = useState<"DAY" | "MONTH" | "YEAR">("DAY");
   const [targetDate, setTargetDate] = useState(() => {
     const d = new Date();
     d.setHours(12, 0, 0, 0); // stable tz
@@ -115,14 +116,14 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") fetchData();
-  }, [status, activeTab, targetDate]);
+  }, [status, activeTab, targetDate, timeRange]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (activeTab === "LOGS") {
         const [data, usersData] = await Promise.all([
-          getAdminLogs(targetDate),
+          getAdminLogs(targetDate, timeRange),
           users.length === 0 ? getUsers() : Promise.resolve(users)
         ]);
         setLogs(data);
