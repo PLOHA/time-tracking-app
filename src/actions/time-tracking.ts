@@ -36,11 +36,11 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
     // Office: Mon-Fri
     const dayOfWeek = bkkTime.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
     if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return { success: false, errorType: "OUT_OF_HOURS", serverTime: bkkTime.toISOString(), shiftDetails: "Office (Mon-Fri | 08:00 - 17:00)", message: "Weekend! No clock-in needed (Mon-Fri only)." };
+      return { success: false, errorType: "OUT_OF_HOURS", serverTime: new Date().toISOString(), shiftDetails: "Office (Mon-Fri | 08:00 - 17:00)", message: "Weekend! No clock-in needed (Mon-Fri only)." };
     }
     // Office check-in window (allow 06:00 to 17:00)
     if (currentHour < 6 || currentHour >= 17) {
-      return { success: false, errorType: "OUT_OF_HOURS", serverTime: bkkTime.toISOString(), shiftDetails: "Office (Mon-Fri | 08:00 - 17:00)", message: "Clock-in allowed only between 08:00 and 17:00." };
+      return { success: false, errorType: "OUT_OF_HOURS", serverTime: new Date().toISOString(), shiftDetails: "Office (Mon-Fri | 08:00 - 17:00)", message: "Clock-in allowed only between 08:00 and 17:00." };
     }
   } else {
     // Shift workers (4 work, 2 off)
@@ -60,19 +60,19 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
     
     if (cycleDay >= 4) {
       // 4 and 5 are off days
-      return { success: false, errorType: "OUT_OF_HOURS", serverTime: bkkTime.toISOString(), shiftDetails: "Shift Worker (4 work, 2 off)", message: "You are currently on your 2-day off cycle." };
+      return { success: false, errorType: "OUT_OF_HOURS", serverTime: new Date().toISOString(), shiftDetails: "Shift Worker (4 work, 2 off)", message: "You are currently on your 2-day off cycle." };
     }
 
     if (user.shiftType === "SHIFT_MORNING") {
       // Morning shift: 06:00 - 18:00
       if (currentHour < 4 || currentHour >= 18) {
-        return { success: false, errorType: "OUT_OF_HOURS", serverTime: bkkTime.toISOString(), shiftDetails: "Morning Shift (06:00 - 18:00)", message: "Morning shift clock-in allowed between 06:00 and 18:00." };
+        return { success: false, errorType: "OUT_OF_HOURS", serverTime: new Date().toISOString(), shiftDetails: "Morning Shift (06:00 - 18:00)", message: "Morning shift clock-in allowed between 06:00 and 18:00." };
       }
     } else if (user.shiftType === "SHIFT_NIGHT") {
       // Night shift: 18:00 - 06:00
       // Allow clock in from 16:00 to 06:00 the next day
       if (currentHour >= 6 && currentHour < 16) {
-        return { success: false, errorType: "OUT_OF_HOURS", serverTime: bkkTime.toISOString(), shiftDetails: "Night Shift (18:00 - 06:00)", message: "Night shift clock-in allowed between 18:00 and 06:00." };
+        return { success: false, errorType: "OUT_OF_HOURS", serverTime: new Date().toISOString(), shiftDetails: "Night Shift (18:00 - 06:00)", message: "Night shift clock-in allowed between 18:00 and 06:00." };
       }
     }
   }
