@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formMsg, setFormMsg] = useState({ text: "", isError: false });
   const [formData, setFormData] = useState({
-    name: "", email: "", passwordRaw: "", shiftType: "OFFICE" as any, cycleStartDate: ""
+    name: "", email: "", passwordRaw: "", shiftType: "OFFICE" as any, cycleStartDate: "", branchId: ""
   });
 
   // Form State - Settings
@@ -281,12 +281,13 @@ export default function AdminDashboardPage() {
     try {
       const res = await createUser({
         ...formData,
-        cycleStartDate: formData.shiftType !== "OFFICE" ? formData.cycleStartDate : null
+        cycleStartDate: formData.shiftType !== "OFFICE" ? formData.cycleStartDate : null,
+          branchId: formData.branchId || null
       });
 
       if (res.success) {
         setFormMsg({ text: res.message, isError: false });
-        setFormData({ name: "", email: "", passwordRaw: "", shiftType: "OFFICE", cycleStartDate: "" });
+        setFormData({ name: "", email: "", passwordRaw: "", shiftType: "OFFICE", cycleStartDate: "", branchId: "" });
         fetchData(); // reload users
       } else {
         setFormMsg({ text: res.message, isError: true });
@@ -760,7 +761,15 @@ export default function AdminDashboardPage() {
                   </div>
                 )}
 
-                <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
+                
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">สาขา (Branch)</label>
+                  <select className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 appearance-none" value={formData.branchId} onChange={e => setFormData({...formData, branchId: e.target.value})}>
+                    <option value="">-- ไม่ระบุ (ใช้สำนักงานใหญ่) --</option>
+                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </div>
+<button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
                   {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_add_user")}
                 </button>
              </form>
