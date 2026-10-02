@@ -472,7 +472,28 @@ export default function AdminDashboardPage() {
 
       {/* Main Content Area */}
       {activeTab === "LOGS" && (
-        <div className="max-w-6xl w-full flex flex-col gap-8">
+          <div className="max-w-6xl w-full flex flex-col gap-8">
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
+                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "มาทำงาน (ปกติ)" : "Present (Normal)"}</div>
+                <div className="text-3xl md:text-4xl font-black text-green-500">{todayNormal}</div>
+              </div>
+              <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
+                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "มาสาย" : "Late"}</div>
+                <div className="text-3xl md:text-4xl font-black text-yellow-500">{todayLate}</div>
+              </div>
+              <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
+                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "ผิดสถานที่" : "Out of Bounds"}</div>
+                <div className="text-3xl md:text-4xl font-black text-red-500">{todayOutOfBounds}</div>
+              </div>
+              <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
+                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "ขาด/ลางาน" : "Missing / Leave"}</div>
+                <div className="text-3xl md:text-4xl font-black text-gray-400">{todayMissing}</div>
+              </div>
+            </div>
+
           
           {/* Charts Container */}
           <div className="neu-flat p-8 flex flex-col xl:flex-row gap-8">
