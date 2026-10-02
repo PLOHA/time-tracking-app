@@ -7,6 +7,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import { getAdminLogs, getAdminMonthlyLogs, updateCompanySettings } from "@/actions/admin";
 import { getUsers, createUser } from "@/actions/users";
 import { getCompanySettings } from "@/actions/time-tracking";
+import { getAdminBranches, updateAdminBranch } from "@/actions/admin";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { formatDuration, formatDistance } from "@/lib/format-utils";
@@ -19,6 +20,7 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"LOGS" | "USERS" | "SETTINGS">("LOGS");
   const [logs, setLogs] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters State for Logs
@@ -134,10 +136,14 @@ export default function AdminDashboardPage() {
           const data = await getUsers();
           setUsers(data);
         }
+        if (branches.length === 0) {
+          const bData = await getAdminBranches();
+          setBranches(bData);
+        }
       } else if (activeTab === "SETTINGS") {
-        const data = await getCompanySettings();
-        if (data) {
-          setSettingsData({ lat: data.companyLat, lng: data.companyLng, radius: data.allowedRadius });
+        if (branches.length === 0) {
+          const bData = await getAdminBranches();
+          setBranches(bData);
         }
       }
     } catch (error) {
@@ -410,7 +416,7 @@ export default function AdminDashboardPage() {
               onClick={() => setActiveTab("SETTINGS")}
               className={`px-6 py-2 rounded-lg font-bold transition-all ${activeTab === "SETTINGS" ? "neu-pressed text-neu-blue" : "text-gray-500 hover:text-gray-700"}`}
             >
-              {t("admin_tab_settings")}
+              สาขา (Branches)
             </button>
           </div>
         </div>
