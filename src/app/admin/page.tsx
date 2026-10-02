@@ -305,8 +305,8 @@ export default function AdminDashboardPage() {
   };
 
   const filteredLogs = logs.filter(log => {
-    if (branchFilter === "TH" && !log.user.branch?.name.includes("TH")) return false;
-    if (branchFilter === "SG" && !log.user.branch?.name.includes("SG")) return false;
+    if (branchFilter === "TH" && !log.user.branch?.name?.includes("TH")) return false;
+    if (branchFilter === "SG" && !log.user.branch?.name?.includes("SG")) return false;
     if (shiftFilter !== "ALL" && log.user.shiftType !== shiftFilter) return false;
     if (searchQuery && !log.user.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -341,8 +341,8 @@ export default function AdminDashboardPage() {
   if (filteredLogs.length > 0) {
     if (users.length > 0) {
       const activeUsers = users.filter(u => {
-          if (branchFilter === "TH" && !u.branch?.name.includes("TH")) return false;
-          if (branchFilter === "SG" && !u.branch?.name.includes("SG")) return false;
+          if (branchFilter === "TH" && !u.branch?.name?.includes("TH")) return false;
+          if (branchFilter === "SG" && !u.branch?.name?.includes("SG")) return false;
         if (shiftFilter !== "ALL" && u.shiftType !== shiftFilter) return false;
         if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
@@ -370,8 +370,8 @@ export default function AdminDashboardPage() {
 
   // Bar Chart Data (Monthly)
   const filteredMonthlyLogs = monthlyLogsData.filter(log => {
-      if (branchFilter === "TH" && !log.user.branch?.name.includes("TH")) return false;
-      if (branchFilter === "SG" && !log.user.branch?.name.includes("SG")) return false;
+      if (branchFilter === "TH" && !log.user.branch?.name?.includes("TH")) return false;
+      if (branchFilter === "SG" && !log.user.branch?.name?.includes("SG")) return false;
     if (shiftFilter !== "ALL" && log.user.shiftType !== shiftFilter) return false;
     if (searchQuery && !log.user.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -707,8 +707,8 @@ export default function AdminDashboardPage() {
                       <div className="mb-4">
                         <div className="flex items-center gap-2">
                             <h3 className="text-lg font-bold text-gray-700">{log.user.name}</h3>
-                            {log.user.branch?.name.includes("TH") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇹🇭 TH</span>}
-                            {log.user.branch?.name.includes("SG") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇸🇬 SG</span>}
+                            {log.user.branch?.name?.includes("TH") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇹🇭 TH</span>}
+                            {log.user.branch?.name?.includes("SG") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇸🇬 SG</span>}
                           </div>
                         <div className="flex gap-2 items-center mt-1">
                           <span className="text-sm font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
