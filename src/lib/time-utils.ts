@@ -1,26 +1,32 @@
-export function calculateLateness(clockInTime: Date | string | null, shiftType: string) {
+export function calculateLateness(clockInTime: Date | string | null, shiftType: string, timezone: string = 'Asia/Bangkok') {
   if (!clockInTime) return { isLate: false, minutesLate: 0, text: "-" };
 
   const time = new Date(clockInTime);
   let expectedHour = 8;
+  if (shiftType === "OFFICE") expectedHour = 8;
+  else if (shiftType === "SHIFT_MORNING") expectedHour = 6;
+  else if (shiftType === "SHIFT_NIGHT") expectedHour = 18;
+
+  const getOffsetMs = (date: Date, tz: string) => {
+    const tzString = date.toLocaleString('en-US', { timeZone: tz });
+    const utcString = date.toLocaleString('en-US', { timeZone: 'UTC' });
+    return new Date(tzString).getTime() - new Date(utcString).getTime();
+  };
+
+  const offsetMs = getOffsetMs(time, timezone);
+  const localTimeMs = time.getTime() + offsetMs;
   
-  if (shiftType === "OFFICE") expectedHour = 8; // 08:00
-  else if (shiftType === "SHIFT_MORNING") expectedHour = 6; // 06:00
-  else if (shiftType === "SHIFT_NIGHT") expectedHour = 18; // 18:00
+  const expectedLocalDate = new Date(localTimeMs);
+  expectedLocalDate.setUTCHours(expectedHour, 0, 0, 0);
 
-  // Expected Date object (on the same day)
-  const expectedTime = new Date(time);
-  expectedTime.setHours(expectedHour, 0, 0, 0);
-
-  // If clock in time is greater than expected time
-  if (time.getTime() > expectedTime.getTime()) {
-    const diffMs = time.getTime() - expectedTime.getTime();
+  if (localTimeMs > expectedLocalDate.getTime()) {
+    const diffMs = localTimeMs - expectedLocalDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     return { isLate: diffMins > 0, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `สาย ${diffMins} นาที` };
   } else {
-    const diffMs = expectedTime.getTime() - time.getTime();
+    const diffMs = expectedLocalDate.getTime() - localTimeMs;
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    return { isLate: false, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `เข้าก่อน ${diffMins} นาที` };
+    return { isLate: false, minutesLate: diffMins, text: diffMins === 0 ? 'ตรงเวลา' : `ก่อนเวลา ${diffMins} นาที` };
   }
 }
 

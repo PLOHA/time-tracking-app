@@ -1065,7 +1065,7 @@ export default function AdminDashboardPage() {
                                      </span>
                                   </div>
                                   {(() => {
-                                    const { isLate, minutesLate } = calculateLateness(log.clockInTime, log.user.shiftType);
+                                    const { isLate, minutesLate } = calculateLateness(log.clockInTime, log.user.shiftType, log.user.branch?.timezone || "Asia/Bangkok");
                                     return (
                                       <p className={`text-xs font-bold mt-1 ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
                                         {formatDuration(minutesLate, language, isLate)}

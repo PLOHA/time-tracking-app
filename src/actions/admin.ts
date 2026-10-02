@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
+import { calculateLateness } from "@/lib/time-utils";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getLocalTodayMidnightUTC } from "@/lib/timezone";
 
@@ -33,11 +34,14 @@ export async function getAdminLogs(dateStr?: string) {
     include: {
       user: {
         select: {
-          id: true,
-          name: true,
-          email: true,
-          shiftType: true,
-        }
+            id: true,
+            name: true,
+            email: true,
+            shiftType: true,
+            branch: {
+              select: { timezone: true }
+            }
+          }
       }
     },
     orderBy: {
@@ -135,11 +139,14 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
     include: {
       user: {
         select: {
-          id: true,
-          name: true,
-          email: true,
-          shiftType: true,
-        }
+            id: true,
+            name: true,
+            email: true,
+            shiftType: true,
+            branch: {
+              select: { timezone: true }
+            }
+          }
       }
     },
     orderBy: [
@@ -172,31 +179,16 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
       distanceOut = calcDistance(log.clockOutLat, log.clockOutLng, settings.companyLat, settings.companyLng);
     }
     
-    // Quick lateness calc
-    let isLate = false;
-    let lateMinutes = 0;
-    if (log.clockInTime) {
-      const time = new Date(log.clockInTime);
-      let expectedHour = 8;
-      if (log.user.shiftType === "SHIFT_MORNING") expectedHour = 6;
-      else if (log.user.shiftType === "SHIFT_NIGHT") expectedHour = 18;
-      
-      const expectedTime = new Date(time);
-      expectedTime.setHours(expectedHour, 0, 0, 0);
-      
-      if (time.getTime() > expectedTime.getTime()) {
-        isLate = true;
-        lateMinutes = Math.floor((time.getTime() - expectedTime.getTime()) / 60000);
-      }
-    }
+    const tz = log.user.branch?.timezone || "Asia/Bangkok";
+      const { isLate, minutesLate, text } = calculateLateness(log.clockInTime, log.user.shiftType, tz);
 
-    return {
-      ...log,
-      distanceIn,
-      distanceOut,
-      lateness: { isLate, minutesLate: lateMinutes, text: isLate ? `สาย ${lateMinutes} นาที` : '-' },
-      lateMinutes
-    };
+      return {
+        ...log,
+        distanceIn,
+        distanceOut,
+        lateness: { isLate, minutesLate, text },
+        lateMinutes: minutesLate
+      };
   });
 }
 

@@ -421,7 +421,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 {(() => {
-                  const { isLate, minutesLate } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || (session?.user as any)?.shiftType || "OFFICE");
+                  const { isLate, minutesLate } = calculateLateness(todayLog.clockInTime, todayLog?.user?.shiftType || (session?.user as any)?.shiftType || "OFFICE", companySettings?.timezone);
                   return (
                     <p className={`text-xs font-bold ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
                       {formatDuration(minutesLate, language, isLate)}
@@ -489,7 +489,7 @@ export default function DashboardPage() {
                 
                 let dotClass = "";
                 if (log) {
-                   const { isLate } = calculateLateness(log.clockInTime, log.user.shiftType);
+                   const { isLate } = calculateLateness(log.clockInTime, log.user.shiftType, companySettings?.timezone);
                    if (isLate || log.clockInFlagged || log.clockOutFlagged) {
                      dotClass = "bg-neu-red"; // Late or out of bounds
                    } else {
@@ -550,7 +550,7 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       {(() => {
-                        const { isLate, minutesLate } = calculateLateness(selectedLog.clockInTime, selectedLog.user.shiftType);
+                        const { isLate, minutesLate } = calculateLateness(selectedLog.clockInTime, selectedLog.user.shiftType, companySettings?.timezone);
                         return (
                           <p className={`text-xs font-bold ${isLate ? 'text-neu-red' : 'text-neu-green'}`}>
                             {formatDuration(minutesLate, language, isLate)}
