@@ -293,26 +293,7 @@ export default function DashboardPage() {
                <svg className="w-5 h-5 text-neu-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             )}
           </button>
-          <div className="relative flex flex-col items-center">
-            {/* Tooltip Banner */}
-            <div className="absolute -top-10 whitespace-nowrap bg-blue-500 text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg z-10 animate-bounce">
-              {language === 'th' ? 'ลบเพื่อทดสอบซ้ำ' : 'Reset to test again'}
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-blue-500 rotate-45"></div>
-            </div>
-            <button
-              onClick={async () => {
-                await clearMyLogs();
-                await loadInitialData();
-                setLocationState("IDLE");
-                setDistance(null);
-                setMessage(t("dash_reset_success"));
-              }}
-              className="w-12 h-12 neu-btn text-neu-blue flex items-center justify-center"
-              title={t("dash_reset")}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-          </div>
+          
           {(session?.user as any)?.role === "ADMIN" && (
             <button
               onClick={() => router.push("/admin")}
