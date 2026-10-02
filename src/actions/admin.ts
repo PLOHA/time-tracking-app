@@ -39,7 +39,7 @@ export async function getAdminLogs(dateStr?: string) {
             email: true,
             shiftType: true,
             branch: {
-              select: { timezone: true, lat: true, lng: true }
+              select: { name: true, timezone: true, lat: true, lng: true }
             }
           }
       }
@@ -144,7 +144,7 @@ export async function getAdminMonthlyLogs(year: number, month: number, targetUse
             email: true,
             shiftType: true,
             branch: {
-              select: { timezone: true, lat: true, lng: true }
+              select: { name: true, timezone: true, lat: true, lng: true }
             }
           }
       }
