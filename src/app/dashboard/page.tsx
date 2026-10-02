@@ -32,6 +32,7 @@ export default function DashboardPage() {
   // Today State
   const [locationState, setLocationState] = useState<"IDLE" | "LOCATING" | "READY" | "ERROR">("IDLE");
   const [distance, setDistance] = useState<number | null>(null);
+  const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [message, setMessage] = useState("");
   const [settings, setSettings] = useState<any>(null);
   const [todayLog, setTodayLog] = useState<any>(null);
