@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getBKKTodayMidnightUTC } from "@/lib/timezone";
 
 export async function getAdminLogs(dateStr?: string) {
   const session = await getServerSession(authOptions);
@@ -19,11 +20,11 @@ export async function getAdminLogs(dateStr?: string) {
   }
 
   // Target date (default to today)
-  let targetDate = new Date();
+  let targetDate = getBKKTodayMidnightUTC();
   if (dateStr) {
     targetDate = new Date(dateStr);
+    targetDate.setHours(0, 0, 0, 0);
   }
-  targetDate.setHours(0, 0, 0, 0);
 
   const logs = await prisma.timeLog.findMany({
     where: {

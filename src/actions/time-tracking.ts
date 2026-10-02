@@ -9,6 +9,8 @@ export async function getCompanySettings() {
   return settings;
 }
 
+import { getBKKTime, getBKKTodayMidnightUTC } from "@/lib/timezone";
+
 export async function clockIn(lat: number, lng: number, distance: number, allowedRadius: number) {
   const session = await getServerSession(authOptions);
   
@@ -22,16 +24,15 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
 
   if (!user) throw new Error("User not found");
 
-  const now = new Date();
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
+  const bkkTime = getBKKTime();
+  const today = getBKKTodayMidnightUTC();
 
   // --- Shift Validation Logic ---
-  const currentHour = now.getHours();
+  const currentHour = bkkTime.getHours();
 
   if (user.shiftType === "OFFICE") {
     // Office: Mon-Fri
-    const dayOfWeek = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const dayOfWeek = bkkTime.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return { success: false, message: "ไม่อนุญาตให้ลงเวลา วันนี้เป็นวันหยุดของคุณ (ส.-อา.)" };
     }
@@ -120,8 +121,7 @@ export async function getTodayLog() {
 
   if (!user) return null;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getBKKTodayMidnightUTC();
 
   const log = await prisma.timeLog.findFirst({
     where: {
@@ -145,8 +145,7 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
   });
   if (!user) throw new Error("User not found");
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getBKKTodayMidnightUTC();
 
   const existingLog = await prisma.timeLog.findFirst({
     where: {
