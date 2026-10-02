@@ -818,51 +818,51 @@ export default function AdminDashboardPage() {
       )}
 
       {activeTab === "SETTINGS" && (
-        <div className="max-w-2xl w-full neu-flat p-8">
-          <h2 className="text-lg font-bold text-gray-700 mb-6">{t("admin_settings_title")}</h2>
-          {loading ? (
-             <div className="space-y-6 animate-pulse">
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
-                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
+        <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+          {branches.map(b => (
+            <div key={b.id} className="neu-flat p-8 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full neu-pressed flex items-center justify-center text-neu-blue text-xl">🏢</div>
+                  <h2 className="text-xl font-bold text-gray-700">{b.name}</h2>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
-                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
-                </div>
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-gray-200/60 rounded"></div>
-                  <div className="h-12 w-full bg-gray-200/60 rounded-xl"></div>
-                </div>
-                <div className="h-14 w-full bg-gray-200/60 rounded-xl mt-4"></div>
-             </div>
-          ) : (
-             <form onSubmit={handleUpdateSettings} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_lat")}</label>
-                  <input type="number" step="any" required value={Number.isNaN(settingsData.lat) ? '' : settingsData.lat} onChange={e => setSettingsData({...settingsData, lat: e.target.value === '' ? NaN : parseFloat(e.target.value)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="13.7563" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_lng")}</label>
-                  <input type="number" step="any" required value={Number.isNaN(settingsData.lng) ? '' : settingsData.lng} onChange={e => setSettingsData({...settingsData, lng: e.target.value === '' ? NaN : parseFloat(e.target.value)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="100.5018" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-2 px-1">{t("admin_radius")}</label>
-                  <input type="number" required value={Number.isNaN(settingsData.radius) ? '' : settingsData.radius} onChange={e => setSettingsData({...settingsData, radius: e.target.value === '' ? NaN : parseInt(e.target.value, 10)})} className="w-full px-4 py-3 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700" placeholder="500" />
-                  <p className="text-xs text-gray-500 mt-2 px-1">{t("admin_radius_desc")}</p>
-                </div>
-
-                {settingMsg && (
-                  <div className="text-sm font-medium px-4 py-2 neu-flat text-neu-green text-center">
-                    {settingMsg}
+                <p className="text-sm text-gray-500 mb-6">🕒 Timezone: {b.timezone}</p>
+                
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const target = e.target as any;
+                  try {
+                    await updateAdminBranch(b.id, {
+                      name: b.name,
+                      timezone: b.timezone,
+                      lat: parseFloat(target.lat.value),
+                      lng: parseFloat(target.lng.value),
+                      allowedRadius: parseInt(target.radius.value)
+                    });
+                    alert("บันทึก " + b.name + " สำเร็จ!");
+                  } catch (err: any) {
+                    alert("Error: " + err.message);
+                  }
+                }} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 px-1">ละติจูด (Lat)</label>
+                      <input name="lat" required type="number" step="any" defaultValue={b.lat} className="w-full neu-input rounded-xl px-4 py-3 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 px-1">ลองจิจูด (Lng)</label>
+                      <input name="lng" required type="number" step="any" defaultValue={b.lng} className="w-full neu-input rounded-xl px-4 py-3 text-sm" />
+                    </div>
                   </div>
-                )}
-
-                <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_save_settings")}
-                </button>
-             </form>
-          )}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1 px-1">รัศมีที่อนุญาต (เมตร)</label>
+                    <input name="radius" required type="number" defaultValue={b.allowedRadius} className="w-full neu-input rounded-xl px-4 py-3 text-sm" />
+                  </div>
+                  <button type="submit" className="w-full neu-btn rounded-xl py-3 text-neu-blue font-bold text-sm mt-4">บันทึกพิกัด</button>
+                </form>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
