@@ -22,7 +22,7 @@ function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2
 }
 
 export default function DashboardPage() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -256,14 +256,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div className="flex flex-wrap gap-3 justify-start md:justify-end w-full md:w-auto">
-            {/* Language Toggle */}
-            <button
-              onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
-              className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center font-bold text-sm"
-              title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
-            >
-              {language === 'th' ? 'TH' : 'EN'}
-            </button>
+            
 
             {/* Effects Toggle */}
             <button

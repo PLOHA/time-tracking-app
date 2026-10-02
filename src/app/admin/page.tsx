@@ -16,7 +16,7 @@ import { formatDuration, formatDistance } from "@/lib/format-utils";
 import { calculateLateness } from "@/lib/time-utils";
 
 export default function AdminDashboardPage() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   
@@ -443,14 +443,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-3 justify-center md:justify-end w-full md:w-auto mt-4 md:mt-0">
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
-            className="w-12 h-12 neu-btn text-gray-500 flex items-center justify-center font-bold text-sm"
-            title={language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
-          >
-            {language === 'th' ? 'TH' : 'EN'}
-          </button>
+          
 
           {/* Effects Toggle */}
           <button

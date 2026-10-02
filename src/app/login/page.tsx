@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
@@ -52,11 +52,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col p-4 relative">
-      {/* Language Switcher */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        <button onClick={() => setLanguage("th")} className={`px-3 py-1 text-xs font-bold rounded-full ${language === 'th' ? 'neu-pressed text-neu-blue' : 'neu-flat text-gray-400'}`}>TH</button>
-        <button onClick={() => setLanguage("en")} className={`px-3 py-1 text-xs font-bold rounded-full ${language === 'en' ? 'neu-pressed text-neu-blue' : 'neu-flat text-gray-400'}`}>EN</button>
-      </div>
+      
 
       <div className="flex-1 flex items-center justify-center">
         <div className="max-w-md w-full neu-flat p-8">
