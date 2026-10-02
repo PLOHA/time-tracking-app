@@ -197,9 +197,15 @@ export async function clearMyLogs() {
   
   if (!user) return;
 
-  // Clear all time logs for this user for easier testing
+  // Clear ONLY today's time log for this user
+  const timezone = "Asia/Singapore";
+  const today = getLocalTodayMidnightUTC(timezone);
+
   await prisma.timeLog.deleteMany({
-    where: { userId: user.id }
+    where: { 
+      userId: user.id,
+      recordDate: today
+    }
   });
   
   return { success: true };
