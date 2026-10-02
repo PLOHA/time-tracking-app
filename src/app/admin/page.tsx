@@ -343,8 +343,6 @@ export default function AdminDashboardPage() {
   if (filteredLogs.length > 0) {
     if (users.length > 0) {
       const activeUsers = users.filter(u => {
-          if (branchFilter === "TH" && !(u as any).branch?.name?.includes("TH")) return false;
-          if (branchFilter === "SG" && !(u as any).branch?.name?.includes("SG")) return false;
         if (shiftFilter !== "ALL" && u.shiftType !== shiftFilter) return false;
         if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
@@ -592,7 +590,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Filter Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <div className="flex justify-between items-center mb-1 px-1">
                   <label className="text-xs font-semibold text-gray-500">{t("admin_filter_date")}</label>
@@ -639,18 +637,7 @@ export default function AdminDashboardPage() {
                   <option value="SHIFT_NIGHT">{t("admin_filter_night")}</option>
                 </select>
               </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_filter_branch") || "Branch"}</label>
-                  <select 
-                    value={branchFilter} 
-                    onChange={(e) => setBranchFilter(e.target.value)} 
-                    className="w-full px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 text-sm font-medium appearance-none"
-                  >
-                    <option value="ALL">{t("admin_filter_all")}</option>
-                    <option value="TH">{t("admin_filter_branch_th") || "Thailand (TH)"}</option>
-                    <option value="SG">{t("admin_filter_branch_sg") || "Singapore (SG)"}</option>
-                  </select>
-                </div>
+                
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1 px-1">{t("admin_search")}</label>
                 <input 
@@ -702,8 +689,8 @@ export default function AdminDashboardPage() {
                       <div className="mb-4">
                         <div className="flex items-center gap-2">
                             <h3 className="text-lg font-bold text-gray-700">{log.user.name}</h3>
-                            {(log.user as any).branch?.name?.includes("TH") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇹🇭 TH</span>}
-                            {(log.user as any).branch?.name?.includes("SG") && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">🇸🇬 SG</span>}
+                            
+                            
                           </div>
                         <div className="flex gap-2 items-center mt-1">
                           <span className="text-sm font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
