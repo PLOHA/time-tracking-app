@@ -347,8 +347,12 @@ export default function AdminDashboardPage() {
     
     filteredLogs.forEach(log => {
       if (log.clockInFlagged || log.clockOutFlagged) todayOutOfBounds++;
-      else if (log.lateness?.isLate) todayLate++;
-      else todayNormal++;
+      else {
+          const tz = log.user.branch?.timezone || "Asia/Bangkok";
+          const clientLateness = calculateLateness(log.clockInTime, log.user.shiftType, tz);
+          if (clientLateness.isLate) todayLate++;
+          else todayNormal++;
+        }
     });
   }
 
@@ -375,8 +379,12 @@ export default function AdminDashboardPage() {
     const d = new Date(log.recordDate).getDate();
     if (barDataMap[d]) {
       if (log.clockInFlagged || log.clockOutFlagged) barDataMap[d][t("dash_out_bounds")]++;
-      else if (log.lateness?.isLate) barDataMap[d][t("admin_late")]++;
-      else barDataMap[d][t("admin_normal")]++;
+      else {
+          const tz = log.user.branch?.timezone || "Asia/Bangkok";
+          const clientLateness = calculateLateness(log.clockInTime, log.user.shiftType, tz);
+          if (clientLateness.isLate) barDataMap[d][t("admin_late")]++;
+          else barDataMap[d][t("admin_normal")]++;
+        }
     }
   });
   const barData = Object.values(barDataMap);
@@ -683,11 +691,18 @@ export default function AdminDashboardPage() {
                           <span className="text-sm font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
                             {log.user.shiftType === 'OFFICE' ? t("admin_filter_office") : log.user.shiftType === 'SHIFT_MORNING' ? t("admin_filter_morning") : t("admin_filter_night")}
                           </span>
-                          {log.lateness && (
-                            <span className={`text-xs font-bold ${log.lateness.isLate ? 'text-neu-red' : 'text-neu-green'}`}>
-                              {formatDuration(log.lateness.minutesLate, language, log.lateness.isLate)}
-                            </span>
-                          )}
+                          {(() => {
+                            const tz = log.user.branch?.timezone || "Asia/Bangkok";
+                            const clientLateness = calculateLateness(log.clockInTime, log.user.shiftType, tz);
+                            if (log.clockInTime) {
+                              return (
+                                <span className={`text-xs font-bold ${clientLateness.isLate ? 'text-neu-red' : 'text-neu-green'}`}>
+                                  {formatDuration(clientLateness.minutesLate, language, clientLateness.isLate)}
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                       </div>
 
