@@ -10,8 +10,8 @@ async function main() {
   await prisma.companySetting.create({
     data: {
       id: 1,
-      companyLat: 1.4429,
-      companyLng: 103.7846, // Seagate Woodlands SG coordinates
+      companyLat: 1.4473917309201805,
+      companyLng: 103.80738155272815, // Seagate Singapore International Headquarters Pte. Ltd. W1
       allowedRadius: 1000,
     }
   });
