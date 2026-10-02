@@ -162,13 +162,13 @@ export default function AdminDashboardPage() {
 
   const generateCSV = (exportLogs: any[], filename: string) => {
     if (exportLogs.length === 0) {
-      alert(language === "th" ? "ไม่มีข้อมูลสำหรับส่งออก" : "No data to export");
+      alert("No data to export");
       return;
     }
-    const headers = [language === "th" ? "วันที่" : "Date", t("admin_name_placeholder"), language === "th" ? "กะทำงาน" : "Shift Type", language === "th" ? "เวลาเข้า" : "Clock In", language === "th" ? "สถานะเข้า" : "In Status", language === "th" ? "ระยะห่างตอนเข้า (เมตร)" : "In Distance (m)", language === "th" ? "เวลาออก" : "Clock Out", language === "th" ? "สถานะออก" : "Out Status", language === "th" ? "สาย (นาที)" : "Late (min)"];
+    const headers = ["Date", t("admin_name_placeholder"), "Shift Type", "Clock In", "In Status", "In Distance (m)", "Clock Out", "Out Status", "Late (min)"];
     
     const rows = exportLogs.map(log => {
-       const dateStr = new Date(log.recordDate).toLocaleDateString('th-TH');
+       const dateStr = new Date(log.recordDate).toLocaleDateString('en-US');
        const inTime = log.clockInTime ? new Date(log.clockInTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false }) : '-';
        const outTime = log.clockOutTime ? new Date(log.clockOutTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false }) : '-';
        const inStatus = log.clockInFlagged ? t("dash_out_bounds") : t("dash_in_bounds");
@@ -208,7 +208,7 @@ export default function AdminDashboardPage() {
       const data = await getAdminMonthlyLogs(d.getFullYear(), d.getMonth() + 1);
       generateCSV(data, `timelogs_${d.getFullYear()}_${d.getMonth() + 1}.csv`);
     } catch (e) {
-      alert(language === "th" ? "เกิดข้อผิดพลาดในการโหลดข้อมูลรายเดือน" : "Failed to load monthly data");
+      alert("Failed to load monthly data");
     }
     setShowExportMenu(false);
   };
@@ -261,7 +261,7 @@ export default function AdminDashboardPage() {
       const res = await updateCompanySettings(settingsData);
       setSettingMsg(res.message);
     } catch (error) {
-      setSettingMsg(language === "th" ? "เกิดข้อผิดพลาด" : "Error saving settings");
+      setSettingMsg("Error saving settings");
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setSettingMsg(""), 3000);
@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
   const formatDate = (dateObj: Date | null | string) => {
     if (!dateObj) return "-";
     const d = new Date(dateObj);
-    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -301,7 +301,7 @@ export default function AdminDashboardPage() {
         setFormMsg({ text: res.message, isError: true });
       }
     } catch (error) {
-      setFormMsg({ text: language === "th" ? "เกิดข้อผิดพลาดในการสร้างพนักงาน" : "Failed to create user", isError: true });
+      setFormMsg({ text: "Failed to create user", isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -448,7 +448,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={toggleEffects}
             className={`w-12 h-12 neu-btn flex items-center justify-center ${effects ? 'text-neu-blue' : 'text-gray-400'}`}
-            title={effects ? (language === 'th' ? 'ปิดเอฟเฟกต์พื้นหลัง' : 'Disable background effects') : (language === 'th' ? 'เปิดเอฟเฟกต์พื้นหลัง' : 'Enable background effects')}
+            title={effects ? ('Disable background effects') : ('Enable background effects')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
           </button>
@@ -464,7 +464,7 @@ export default function AdminDashboardPage() {
                <svg className="w-5 h-5 text-neu-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             )}
           </button>
-          <button onClick={() => router.push("/dashboard")} className="neu-btn text-gray-600 px-6 py-2 font-medium">{language === "th" ? "กลับหน้าลงเวลา" : "Back to Tracking"}</button>
+          <button onClick={() => router.push("/dashboard")} className="neu-btn text-gray-600 px-6 py-2 font-medium">{"Back to Tracking"}</button>
           <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-12 h-12 neu-btn text-neu-red flex items-center justify-center" title={t("dash_logout")}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           </button>
@@ -478,19 +478,19 @@ export default function AdminDashboardPage() {
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
-                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "มาทำงาน (ปกติ)" : "Present (Normal)"}</div>
+                <div className="text-sm font-bold text-gray-400 mb-1">{"Present (Normal)"}</div>
                 <div className="text-3xl md:text-4xl font-black text-green-500">{todayNormal}</div>
               </div>
               <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
-                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "มาสาย" : "Late"}</div>
+                <div className="text-sm font-bold text-gray-400 mb-1">{"Late"}</div>
                 <div className="text-3xl md:text-4xl font-black text-yellow-500">{todayLate}</div>
               </div>
               <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
-                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "ผิดสถานที่" : "Out of Bounds"}</div>
+                <div className="text-sm font-bold text-gray-400 mb-1">{"Out of Bounds"}</div>
                 <div className="text-3xl md:text-4xl font-black text-red-500">{todayOutOfBounds}</div>
               </div>
               <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
-                <div className="text-sm font-bold text-gray-400 mb-1">{language === 'th' ? "ขาด/ลางาน" : "Missing / Leave"}</div>
+                <div className="text-sm font-bold text-gray-400 mb-1">{"Missing / Leave"}</div>
                 <div className="text-3xl md:text-4xl font-black text-gray-400">{todayMissing}</div>
               </div>
             </div>
@@ -541,7 +541,7 @@ export default function AdminDashboardPage() {
 
              {/* Bar Chart */}
              <div className="w-full xl:w-2/3 flex flex-col">
-               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_monthly_stats")} ({new Date(targetDate).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })})</h2>
+               <h2 className="text-lg font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">{t("admin_monthly_stats")} ({new Date(targetDate).toLocaleString("en-US", { month: "long" })})</h2>
                <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
                  <div className="h-64" style={{ minWidth: '700px' }}>
                    {isMonthlyLoading ? (
@@ -558,7 +558,7 @@ export default function AdminDashboardPage() {
                              if (active && payload && payload.length) {
                                return (
                                  <div className="neu-flat p-3 rounded-xl bg-neu-bg border-none">
-                                   <p className="text-xs font-bold text-gray-500 mb-2">{language === "th" ? language === "th" ? "วันที่" : "Date" : "Date"} {label}</p>
+                                   <p className="text-xs font-bold text-gray-500 mb-2">{language === "th" ? "Date" : "Date"} {label}</p>
                                    {payload.map((entry: any, index: number) => (
                                      <div key={`item-${index}`} className="flex items-center gap-2 text-sm font-bold">
                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></span>
@@ -626,7 +626,7 @@ export default function AdminDashboardPage() {
                     }}
                     className="text-[10px] font-bold text-neu-blue hover:underline"
                   >
-                    {language === "th" ? "วันนี้" : "Today"}
+                    {"Today"}
                   </button>
                 </div>
                 <input 
@@ -809,7 +809,7 @@ export default function AdminDashboardPage() {
 
                 
 <button type="submit" disabled={isSubmitting} className="w-full neu-btn text-neu-blue font-bold py-4 mt-4">
-                  {isSubmitting ? (language === "th" ? "กำลังบันทึก..." : "Saving...") : t("admin_btn_add_user")}
+                  {isSubmitting ? ("Saving...") : t("admin_btn_add_user")}
                 </button>
              </form>
           </div>
@@ -1036,7 +1036,7 @@ export default function AdminDashboardPage() {
                       <button onClick={handlePrevCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                       </button>
-                      <h2 className="text-xl font-bold text-gray-700">{new Date(calYear, calMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} {calYear}</h2>
+                      <h2 className="text-xl font-bold text-gray-700">{new Date(calYear, calMonth - 1).toLocaleString("en-US", { month: "long" })} {calYear}</h2>
                       <button onClick={handleNextCalMonth} className="w-10 h-10 neu-btn flex justify-center items-center rounded-full text-gray-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                       </button>

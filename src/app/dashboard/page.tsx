@@ -173,13 +173,13 @@ export default function DashboardPage() {
                 setMessage(`You are out of bounds (${dist}m). Clocking in will be flagged.`);
               }
             } else {
-              setMessage(language === "th" ? `ยืนยันพิกัดสำเร็จ คุณอยู่ในระยะที่กำหนด (${dist} เมตร)` : `Location valid. You are within bounds (${dist}m).`);
+              setMessage(`Location valid. You are within bounds (${dist}m).`);
             }
         },
         (error) => {
           setLocationState("ERROR");
-          if (error.code === 1) setMessage(language === "th" ? "กรุณาอนุญาตการเข้าถึง GPS" : "Please allow GPS access");
-          else setMessage(language === "th" ? "ไม่สามารถดึงพิกัด GPS ได้" : "Could not retrieve GPS location");
+          if (error.code === 1) setMessage("Please allow GPS access");
+          else setMessage("Could not retrieve GPS location");
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -212,7 +212,7 @@ export default function DashboardPage() {
           setIsSubmitting(false);
        });
     } catch(e) {
-       setMessage(t("dash_error_submit") || (language === "th" ? "เกิดข้อผิดพลาด" : "Error occurred"));
+       setMessage(t("dash_error_submit") || ("Error occurred"));
        setIsSubmitting(false);
     }
   };
@@ -282,7 +282,7 @@ export default function DashboardPage() {
             <button
               onClick={toggleEffects}
               className={`w-12 h-12 neu-btn flex items-center justify-center ${effects ? 'text-neu-blue' : 'text-gray-400'}`}
-              title={effects ? (language === 'th' ? 'ปิดเอฟเฟกต์พื้นหลัง' : 'Disable background effects') : (language === 'th' ? 'เปิดเอฟเฟกต์พื้นหลัง' : 'Enable background effects')}
+              title={effects ? ('Disable background effects') : ('Enable background effects')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
             </button>
@@ -354,7 +354,7 @@ export default function DashboardPage() {
                   {locationState === 'READY' && (
                     <>
                       <div className="text-2xl font-bold leading-tight px-2">{formatDistance(distance, language)}</div>
-                      <div className="text-[10px] mt-1 text-gray-500 font-semibold uppercase tracking-wider">{language === "th" ? "ระยะห่าง" : "Distance"}</div>
+                      <div className="text-[10px] mt-1 text-gray-500 font-semibold uppercase tracking-wider">{"Distance"}</div>
                     </>
                   )}
               </div>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
               <button onClick={handlePrevMonth} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 className="text-lg font-bold text-gray-700">{new Date(currentYear, currentMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} {currentYear}</h2>
+              <h2 className="text-lg font-bold text-gray-700">{new Date(currentYear, currentMonth - 1).toLocaleString("en-US", { month: "long" })} {currentYear}</h2>
               <button onClick={handleNextMonth} className="w-10 h-10 neu-btn text-gray-500 flex items-center justify-center">
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
@@ -511,7 +511,7 @@ export default function DashboardPage() {
           {/* Details Card */}
           <div className="neu-flat p-6 rounded-2xl">
              <h3 className="text-md font-bold text-gray-700 mb-4 text-center">
-               {"Details "}{selectedDateNum ? (language === "th" ? `${selectedDateNum} ${new Date(currentYear, currentMonth - 1).toLocaleString(language === "th" ? "th-TH" : "en-US", { month: "long" })} ${currentYear}` : `${new Date(currentYear, currentMonth - 1, selectedDateNum).toLocaleString("en-US", { month: "long" })} ${selectedDateNum}, ${currentYear}`) : ""}
+               {"Details "}{selectedDateNum ? (`${new Date(currentYear, currentMonth - 1, selectedDateNum).toLocaleString("en-US", { month: "long" })} ${selectedDateNum}, ${currentYear}`) : ""}
              </h3>
              
              {isHistoryLoading ? (
@@ -592,19 +592,19 @@ export default function DashboardPage() {
             <button
               onClick={async () => {
                  setHasClickedReset(true);
-                 const confirmed = window.confirm(language === 'th' ? "แน่ใจใช่ไหม?" : "Are you sure?");
+                 const confirmed = window.confirm("Are you sure?");
                  if (!confirmed) return;
                  
                  await clearMyLogs();
                  setTodayLog(null);
                  setDistance(null);
                  setLocationState("IDLE");
-                 setMessage(language === "th" ? "รีเซ็ตข้อมูลสำเร็จ" : "Logs cleared!");
+                 setMessage("Logs cleared!");
               }}
               className={`px-6 py-3 rounded-xl neu-flat flex items-center justify-center gap-2 text-blue-500 transition-all font-bold ${effects ? 'active:neu-pressed hover:scale-105' : ''}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              {language === 'th' ? 'ล้างข้อมูลเพื่อเทสต์ใหม่' : 'Reset to test again'}
+              {'Reset to test again'}
             </button>
          </div>
       </div>
@@ -619,22 +619,22 @@ export default function DashboardPage() {
             
             <div className="mt-10 text-center">
               <h3 className="text-xl font-black text-gray-800 dark:text-white mb-2">
-                {language === 'th' ? "ยังไม่ถึงเวลาทำงานของคุณ!" : "Not Your Working Hours!"}
+                {"Not Your Working Hours!"}
               </h3>
               
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-6 px-2">
-                {language === 'th' ? "ดูเหมือนคุณจะพยายามลงเวลาผิดช่วงเวลาครับ พักผ่อนก่อนน้า 🛌" : "Looks like you're trying to clock in outside your shift. Go get some rest! 🛌"}
+                {"Looks like you're trying to clock in outside your shift. Go get some rest! 🛌"}
               </div>
 
               <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 mb-6 text-left border border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-800">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{language === 'th' ? "เวลาเซิร์ฟเวอร์ตอนนี้" : "Current Server Time"}</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{"Current Server Time"}</span>
                   <span className="text-sm font-bold text-red-500">
                     {new Date(outOfHoursData.serverTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{language === 'th' ? "กะและเวลาทำงานของคุณ" : "Your Assigned Shift"}</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{"Your Assigned Shift"}</span>
                   <span className="text-sm font-bold text-blue-500">{outOfHoursData.shiftDetails}</span>
                 </div>
               </div>
@@ -643,7 +643,7 @@ export default function DashboardPage() {
                 onClick={() => setOutOfHoursData(null)}
                 className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all active:scale-95"
               >
-                {language === 'th' ? "รับทราบ" : "Got it"}
+                {"Got it"}
               </button>
             </div>
           </div>
