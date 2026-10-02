@@ -475,6 +475,21 @@ export default function AdminDashboardPage() {
       {activeTab === "LOGS" && (
           <div className="max-w-6xl w-full flex flex-col gap-8">
 
+            
+            {/* Time Range Selector */}
+            <div className="neu-flat p-4 flex items-center justify-between gap-4">
+               <div className="text-sm font-bold text-gray-500 uppercase tracking-wider">Time Range Filter</div>
+               <select 
+                 value={timeRange} 
+                 onChange={(e) => setTimeRange(e.target.value as "DAY" | "MONTH" | "YEAR")} 
+                 className="px-4 py-2 bg-neu-bg shadow-neu-pressed rounded-xl focus:outline-none text-gray-700 font-bold appearance-none cursor-pointer"
+               >
+                 <option value="DAY">Daily (Selected Date)</option>
+                 <option value="MONTH">Monthly (Entire Month)</option>
+                 <option value="YEAR">Yearly (Entire Year)</option>
+               </select>
+            </div>
+
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               <div className="neu-flat p-6 flex flex-col items-center justify-center text-center">
