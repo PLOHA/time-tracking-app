@@ -588,12 +588,7 @@ export default function DashboardPage() {
             </div>
          )}
          <div className="relative flex flex-col items-center">
-            {!hasClickedReset && (
-               <div className="absolute -top-10 whitespace-nowrap bg-blue-500 text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg z-10 animate-bounce">
-                  {language === 'th' ? 'ล้างข้อมูลเพื่อเทสต์ใหม่' : 'Reset to test again'}
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-blue-500 rotate-45"></div>
-               </div>
-            )}
+            
             <button
               onClick={async () => {
                  setHasClickedReset(true);
