@@ -18,6 +18,8 @@ export async function getUsers() {
       shiftType: true,
       cycleStartDate: true,
       role: true,
+      branchId: true,
+      branch: { select: { name: true, timezone: true } }
     }
   });
 
@@ -30,6 +32,7 @@ export async function createUser(data: {
   passwordRaw: string;
   shiftType: "OFFICE" | "SHIFT_MORNING" | "SHIFT_NIGHT";
   cycleStartDate: string | null;
+  branchId?: string | null;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Unauthorized");
@@ -57,8 +60,16 @@ export async function createUser(data: {
       passwordHash: passwordHash,
       shiftType: data.shiftType,
       cycleStartDate: parsedDate,
+      branchId: data.branchId || null,
     },
   });
 
   return { success: true, message: "เพิ่มพนักงานสำเร็จ" };
+}
+
+export async function updateUser(id: string, data: any) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
+  await prisma.user.update({ where: { id }, data });
+  return { success: true };
 }

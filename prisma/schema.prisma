@@ -22,9 +22,26 @@ model User {
   
   role             Role      @default(EMPLOYEE)
   
+  branchId         String?
+  branch           Branch?   @relation(fields: [branchId], references: [id])
+  
   timeLogs         TimeLog[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+}
+
+model Branch {
+  id            String    @id @default(uuid())
+  name          String
+  timezone      String    // e.g. 'Asia/Bangkok'
+  lat           Float
+  lng           Float
+  allowedRadius Int       @default(500)
+  
+  users         User[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model TimeLog {

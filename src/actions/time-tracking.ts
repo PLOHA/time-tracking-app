@@ -6,10 +6,30 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function getCompanySettings() {
   const settings = await prisma.companySetting.findFirst();
+  const session = await getServerSession(authOptions);
+  
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { branch: true }
+    });
+    
+    if (user?.branch) {
+      return {
+        id: settings?.id || 1,
+        companyLat: user.branch.lat,
+        companyLng: user.branch.lng,
+        allowedRadius: user.branch.allowedRadius,
+        branchName: user.branch.name,
+        updatedAt: user.branch.updatedAt,
+      };
+    }
+  }
+
   return settings;
 }
 
-import { getBKKTime, getBKKTodayMidnightUTC } from "@/lib/timezone";
+import { getLocalTime, getLocalTodayMidnightUTC } from "@/lib/timezone";
 
 export async function clockIn(lat: number, lng: number, distance: number, allowedRadius: number) {
   const session = await getServerSession(authOptions);
@@ -20,12 +40,14 @@ export async function clockIn(lat: number, lng: number, distance: number, allowe
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
+    include: { branch: true }
   });
 
   if (!user) throw new Error("User not found");
 
-  const bkkTime = getBKKTime();
-  const today = getBKKTodayMidnightUTC();
+  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const bkkTime = getLocalTime(timezone);
+  const today = getLocalTodayMidnightUTC(timezone);
 
   // --- Shift Validation Logic ---
   const currentHour = bkkTime.getHours();
@@ -117,11 +139,13 @@ export async function getTodayLog() {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
+    include: { branch: true }
   });
 
   if (!user) return null;
 
-  const today = getBKKTodayMidnightUTC();
+  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const today = getLocalTodayMidnightUTC(timezone);
 
   const log = await prisma.timeLog.findFirst({
     where: {
@@ -142,10 +166,12 @@ export async function clockOut(lat: number, lng: number, distance: number, allow
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
+    include: { branch: true }
   });
   if (!user) throw new Error("User not found");
 
-  const today = getBKKTodayMidnightUTC();
+  const timezone = user.branch?.timezone || "Asia/Bangkok";
+  const today = getLocalTodayMidnightUTC(timezone);
 
   const existingLog = await prisma.timeLog.findFirst({
     where: {

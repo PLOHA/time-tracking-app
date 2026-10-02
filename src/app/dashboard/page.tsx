@@ -251,6 +251,9 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-xl font-bold text-gray-700 leading-tight">{t("dash_title")}</h1>
             <p className="text-sm text-neu-blue font-medium mt-1">{t("dash_welcome")} {session?.user?.name}</p>
+            {settings?.branchName && (
+              <p className="text-xs text-gray-500 font-bold mt-1">📍 {settings.branchName}</p>
+            )}
           </div>
           <div className="flex flex-wrap gap-3 justify-start md:justify-end w-full md:w-auto">
             {/* Language Toggle */}

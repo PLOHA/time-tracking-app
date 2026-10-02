@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getBKKTodayMidnightUTC } from "@/lib/timezone";
+import { getLocalTodayMidnightUTC } from "@/lib/timezone";
 
 export async function getAdminLogs(dateStr?: string) {
   const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function getAdminLogs(dateStr?: string) {
   }
 
   // Target date (default to today)
-  let targetDate = getBKKTodayMidnightUTC();
+  let targetDate = getLocalTodayMidnightUTC();
   if (dateStr) {
     targetDate = new Date(dateStr);
     targetDate.setHours(0, 0, 0, 0);
@@ -227,4 +227,22 @@ export async function updateCompanySettings(data: { lat: number, lng: number, ra
   });
 
   return { success: true, message: "อัปเดตการตั้งค่าสำเร็จ" };
+}
+
+export async function getAdminBranches() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') return [];
+  return await prisma.branch.findMany({ orderBy: { createdAt: 'desc' } });
+}
+
+export async function createAdminBranch(data: { name: string, timezone: string, lat: number, lng: number, allowedRadius: number }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
+  return await prisma.branch.create({ data });
+}
+
+export async function updateAdminBranch(id: string, data: { name: string, timezone: string, lat: number, lng: number, allowedRadius: number }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email || (session.user as any).role !== 'ADMIN') throw new Error('Unauthorized');
+  return await prisma.branch.update({ where: { id }, data });
 }
